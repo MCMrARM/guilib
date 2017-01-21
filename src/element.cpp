@@ -6,7 +6,7 @@ GuiElement::GuiElement(std::weak_ptr<GuiElement> parent) : parent(parent) {
     //
 }
 
-GuiComputedSize GuiElement::getComputedPosition() const {
+GuiComputedPosition GuiElement::getComputedPosition() const {
     return {cleft, ctop};
 }
 

@@ -61,7 +61,7 @@ public:
      * Returns the current element position.
      * @return a structure containing the position
      */
-    GuiComputedSize getComputedPosition() const;
+    GuiComputedPosition getComputedPosition() const;
 
     /**
      * Returns the current element size.
