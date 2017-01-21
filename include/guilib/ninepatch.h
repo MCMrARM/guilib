@@ -9,14 +9,14 @@ class GuiNinepatchImage {
 
 private:
 
-    mce::TexturePtr tex;
+    //mce::TexturePtr tex;
     float u1 = 0.f, u2 = 1.f;
     float v1 = 0.f, v2 = 1.f;
-    mce::Mesh mesh;
+    //mce::Mesh mesh;
 
 public:
 
-    void setTexture(mce::TexturePtr const& tex, float u1, float v1, float u2, float v2);
+    //void setTexture(mce::TexturePtr const& tex, float u1, float v1, float u2, float v2);
 
     void reset();
 

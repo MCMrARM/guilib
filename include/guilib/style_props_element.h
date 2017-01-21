@@ -1,0 +1,11 @@
+#include "style_props_common.h"
+STYLE_PROP(left, left, float, -1.f)
+STYLE_PROP(right, right, float, -1.f)
+STYLE_PROP(top, top, float, -1.f)
+STYLE_PROP(bottom, bottom, float, -1.f)
+STYLE_PROP(width, width, float, -1.f)
+STYLE_PROP(height, height, float, -1.f)
+STYLE_PROP(borderWidth, border-width, float, 0.f)
+STYLE_PROP(borderColor, border-color, GuiColor, GuiColor())
+STYLE_PROP(backgroundColor, background-color, GuiColor, GuiColor())
+STYLE_PROP(backgroundImage, background-image, GuiNinepatchImage, GuiNinepatchImage())
