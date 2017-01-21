@@ -1,9 +1,17 @@
 #include <guilib/element.h>
 
+#define DEF_NAME GuiElement
+#define DEF_LISTH <guilib/style_props_element.h>
+#include <guilib/style_def_callbacks.h>
+
 using namespace guilib;
 
 GuiElement::GuiElement(std::weak_ptr<GuiElement> parent) : parent(parent), styleManager(*this) {
     //
+}
+
+void GuiElement::setStyleState(GuiStyleState newState) {
+    styleManager.updateState(newState);
 }
 
 GuiComputedPosition GuiElement::getComputedPosition() {
@@ -65,5 +73,6 @@ void GuiElement::onParentSizeChange() {
 }
 
 void GuiElement::notifyPositionDataChanged() {
+    printf("NotifyPositionDataChanged\n");
     cdirty = true;
 }

@@ -2,9 +2,8 @@
 
 #include <string>
 #include "element.h"
-#include "color.h"
 
-#define DEF_NAME GuiTextStyle
+#define DEF_NAME GuiText
 #define DEF_LISTH "style_props_text.h"
 #include "style_def.h"
 

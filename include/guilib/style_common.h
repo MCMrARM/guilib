@@ -52,7 +52,7 @@ struct GuiStyleObjectData {
 #define GUI_OBJECT_STYLE(type, parent) \
     public: \
     struct StyleManager : public parent::StyleManager, public type ## StyleManager { \
-        StyleManager(type& el) : parent::StyleManager(el), type ## StyleManager(el.styleData, el.state) { } \
+        StyleManager(type& el) : parent::StyleManager(el), type ## StyleManager(el, el.styleData) { } \
     }; \
     private: \
     GuiStyleObjectData<type ## Style> styleData; \

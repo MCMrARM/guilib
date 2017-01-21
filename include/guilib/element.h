@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#define DEF_NAME GuiElementStyle
+#define DEF_NAME GuiElement
 #define DEF_LISTH "style_props_element.h"
 #include "style_def.h"
 
@@ -22,7 +22,7 @@ class GuiElement {
 public:
 
     struct StyleManager : public GuiElementStyleManager {
-        StyleManager(GuiElement& element) : GuiElementStyleManager(element.elementStyleData, element.state) { }
+        StyleManager(GuiElement& element) : GuiElementStyleManager(element, element.elementStyleData) { }
     };
 
 protected:
@@ -35,6 +35,12 @@ protected:
     float cleft = 0.f, ctop = 0.f;
     float cwidth = 0.f, cheight = 0.f;
     bool cdirty = true;
+
+    /**
+     * This function will be called to change the used style state. If you need to
+     * @param newState the new state to set
+     */
+    virtual void setStyleState(GuiStyleState newState);
 
 private:
 

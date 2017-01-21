@@ -14,13 +14,11 @@ class GuiContainer : public GuiElement {
 
 private:
 
-    std::vector<std::unique_ptr<GuiElement>> elements;
-
-    GuiNinepatchImage background;
+    std::vector<std::shared_ptr<GuiElement>> elements;
 
 public:
 
-    GuiContainer(std::weak_ptr<GuiElement> parent) : GuiElement(parent) { }
+    GuiContainer(std::weak_ptr<GuiElement> parent);
 
     virtual void draw();
 
@@ -30,18 +28,12 @@ public:
      * Add an element to this container.
      * @param element the element to add
      */
-    void addElement(std::unique_ptr<GuiElement> element);
+    void addElement(std::shared_ptr<GuiElement> element);
 
     /**
      * Clear this element container.
      */
     void clear();
-
-    /**
-     * Sets the container background image.
-     * @param texture the new background to set
-     */
-    void setBackground(GuiNinepatchTexture const& texture);
 
 };
 

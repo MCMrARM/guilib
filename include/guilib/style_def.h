@@ -2,20 +2,25 @@
 #include <string>
 #include "style_common.h"
 
-#define STYLE_PROP2(name, cssname, type, def) STYLE_PROP(name, cssname, type, def, )
-
 namespace guilib {
 
-struct DEF_NAME {
+class DEF_NAME;
 
-#define STYLE_PROP(name, cssname, type, def) GuiStyleProperty<type> name;
+#define _STYLE_NAME(A, B) A ## B
+#define STYLE_NAME(X) _MGR_NAME(X, Style)
+#define _MGR_NAME(A, B) A ## B
+#define MGR_NAME(X) _MGR_NAME(X, StyleManager)
+
+struct STYLE_NAME(DEF_NAME) {
+
+#define STYLE_PROP(name, cssname, type, def, cb) GuiStyleProperty<type> name;
 #include DEF_LISTH
 #undef STYLE_PROP
 
-    DEF_NAME() {}
-    DEF_NAME(std::map<std::string, std::string> const& prop) {
+    STYLE_NAME(DEF_NAME)() {}
+    STYLE_NAME(DEF_NAME)(std::map<std::string, std::string> const& prop) {
 
-#define STYLE_PROP(name, cssname, type, def) \
+#define STYLE_PROP(name, cssname, type, def, cb) \
         if (prop.count(#cssname) > 0) \
             name.setFromString(prop.at(#cssname));
 #include DEF_LISTH
@@ -25,21 +30,19 @@ struct DEF_NAME {
 
 };
 
-#define _MGR_NAME(A, B) A ## B
-#define MGR_NAME(X) _MGR_NAME(X, Manager)
 class MGR_NAME(DEF_NAME) {
 
 private:
-    GuiStyleObjectData<DEF_NAME>& data;
-    GuiStyleState& state;
+    DEF_NAME& el;
+    GuiStyleObjectData<STYLE_NAME(DEF_NAME)>& data;
+    GuiStyleState state;
 
 public:
-    MGR_NAME(DEF_NAME)(GuiStyleObjectData<DEF_NAME>& data, GuiStyleState& state) : data(data), state(state) { }
+    MGR_NAME(DEF_NAME)(DEF_NAME& el, GuiStyleObjectData<STYLE_NAME(DEF_NAME)>& data) : el(el), data(data) { }
 
-#define STYLE_PROP(name, cssname, type, def) \
-    void name(type const& val) { \
-        data.overrides.name = val; \
-    } \
+    void updateState(GuiStyleState const& newState);
+
+#define STYLE_PROP(name, cssname, type, def, cb) \
     type const& name() const { \
         if (data.overrides.name.isSet()) \
             return data.overrides.name.get(); \
@@ -52,7 +55,20 @@ public:
 #include DEF_LISTH
 #undef STYLE_PROP
 
+#undef STYLE_PROP2
+#define STYLE_PROP(name, cssname, type, def, cb) \
+    void name(type const& val);
+#define STYLE_PROP2(name, cssname, type, def) \
+    void name(type const& val) { \
+        data.overrides.name = val; \
+    }
+#include DEF_LISTH
+#undef STYLE_PROP
+#undef STYLE_PROP2
+
 };
+#undef STYLE_NAME
+#undef _STYLE_NAME
 #undef MGR_NAME
 #undef _MGR_NAME
 
