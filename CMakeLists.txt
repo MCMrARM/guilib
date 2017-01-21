@@ -9,5 +9,5 @@ include_directories(include/)
 
 add_library(guilib SHARED
         src/main.cpp include/guilib/skin.h include/guilib/element.h include/guilib/container.h include/guilib/window.h
-        include/guilib/ninepatch.h include/guilib/button.h include/guilib/label.h include/guilib/color.h src/color.cpp)
+        include/guilib/ninepatch.h include/guilib/button.h include/guilib/label.h include/guilib/color.h src/color.cpp src/element.cpp)
 target_link_libraries(guilib ${TML_LIBRARIES} ${MINECRAFT_LIBRARIES})

@@ -18,8 +18,8 @@ private:
 
 public:
 
-    GuiLabel(std::string const& text);
-    GuiLabel(std::string const& text, GuiColor customColor);
+    GuiLabel(std::weak_ptr<GuiElement> parent, std::string const& text);
+    GuiLabel(std::weak_ptr<GuiElement> parent, std::string const& text, GuiColor customColor);
 
     void setColor(GuiColor const& color);
 

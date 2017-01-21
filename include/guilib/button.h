@@ -16,7 +16,7 @@ private:
 
 public:
 
-    GuiButton(std::string const& text);
+    GuiButton(std::weak_ptr<GuiElement> parent, std::string const& text);
 
     void setText(std::string const& text);
 

@@ -1,33 +1,54 @@
 #pragma once
 
+#include <memory>
+
 namespace guilib {
 
 class GuiSkin;
-struct GuiAnchor {
-    bool left = true, right = false, top = true, bottom = false;
+class GuiContainer;
+
+struct GuiAnchors {
+    bool left, right, top, bottom;
+};
+struct GuiComputedPosition {
+    float left, top;
+};
+struct GuiComputedSize {
+    float width, height;
 };
 
 class GuiElement {
 
 protected:
 
+    std::weak_ptr<GuiElement> parent;
+
+    // position
     float left = 0.f, top = 0.f, right = 0.f, bottom = 0.f;
     float width = 0.f, height = 0.f;
-    GuiAnchor anchors;
+
+    // computed position
+    float cleft = 0.f, ctop = 0.f;
 
 public:
 
-    GuiElement() { }
+    GuiElement(std::weak_ptr<GuiElement> parent);
 
     virtual ~GuiElement() { }
 
     virtual void draw() = 0;
 
     /**
-     * The function called when the size of this container changes. This will be called by all functions that update the
+     * The function called when the size of this element changes. This will be called by all functions that update the
      * position and shouldn't really be called manually.
      */
-    virtual void sizeChanged() { }
+    virtual void onSizeChanged() { }
+
+    /**
+     * This function notifies the element that the parent element has been resized. It'll cause this element to resize
+     * as well. You're only supposed to call it from the container that owns the element.
+     */
+    void onParentSizeChange();
 
     /**
      * Set the GUI skin for this element. If this change is called on an container this change will be propagated
@@ -35,6 +56,18 @@ public:
      * @param skin the new gui skin to use
      */
     virtual void setSkin(GuiSkin const& skin) { }
+
+    /**
+     * Returns the current element position.
+     * @return a structure containing the position
+     */
+    GuiComputedSize getComputedPosition() const;
+
+    /**
+     * Returns the current element size.
+     * @return a structure containing the size
+     */
+    GuiComputedSize getComputedSize() const;
 
     /**
      * This function sets the element's position and size, relative to the top left corner of the screen.
@@ -54,7 +87,7 @@ public:
      * @param right the right coordinate (relative to the parent element)
      * @param bottom the bottom coordinate (relative to the parent element)
      */
-    void setPos(GuiAnchor const& anchors, float left, float top, float right, float bottom);
+    void setPos(GuiAnchors const& anchors, float left, float top, float right, float bottom);
 
     /**
      * Sets the position relative to the parent element. All values must be passed based on the parent element

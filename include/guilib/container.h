@@ -20,9 +20,11 @@ private:
 
 public:
 
+    GuiContainer(std::weak_ptr<GuiElement> parent) : GuiElement(parent) { }
+
     virtual void draw();
 
-    virtual void sizeChanged();
+    virtual void onSizeChanged();
 
     /**
      * Add an element to this container.
