@@ -16,6 +16,10 @@ public:
     GuiColor(unsigned int argb);
     GuiColor(GuiColor const& c) : r(c.r), g(c.g), b(c.b), a(c.a) { }
 
+    GuiColor& operator*(GuiColor const& c);
+
+    unsigned int toARGB();
+
 };
 
 }
