@@ -15,9 +15,14 @@ std::shared_ptr<GuiContainer> createTestUi(float w, float h) {
     std::shared_ptr<GuiContainer> container(new GuiContainer(std::weak_ptr<GuiElement>()));
     container->style().width(w);
     container->style().height(h);
+    container->style().paddingLeft(5.f);
+    container->style().paddingRight(50.f);
+    container->style().paddingTop(5.f);
     std::shared_ptr<GuiText> text(new GuiText(container, "This is a really long test text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus."));
     text->style().textColor(GuiColor(0xFFFF00));
     text->style().display(GuiDisplayMode::INLINE);
+    text->style().paddingLeft(10.f);
+    text->style().paddingRight(10.f);
     container->addElement(text);
     std::shared_ptr<GuiText> text2(new GuiText(container, "If this will work it'll be perfect."));
     text2->style().textColor(GuiColor(0x00FF00));

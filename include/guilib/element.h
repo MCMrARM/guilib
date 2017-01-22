@@ -17,6 +17,9 @@ struct GuiComputedPosition {
 struct GuiComputedSize {
     float width, height;
 };
+struct GuiMargin {
+    float left, top, right, bottom;
+};
 
 class GuiElement {
 
@@ -35,6 +38,7 @@ protected:
     // computed position
     float cleft = 0.f, ctop = 0.f;
     float cwidth = 0.f, cheight = 0.f;
+    GuiMargin cmargin, cpadding;
     bool cdirty = true;
 
     /**
@@ -121,10 +125,34 @@ public:
     GuiComputedPosition getComputedPosition();
 
     /**
-     * Returns the current element size (and caches it for further calls).
+     * Returns the element margin.
+     */
+    GuiMargin getMargin();
+
+    /**
+     * Returns the element padding.
+     */
+    GuiMargin getPadding();
+
+    /**
+     * Returns the current element outer size (and caches it for further calls).
+     * The outer size is the total size of the element, including margins taken by this element.
+     * @return a structure containing the size
+     */
+    GuiComputedSize getComputedOuterSize();
+
+    /**
+     * Returns the current element size (and caches it for further calls) excluding margins but including paddings.
      * @return a structure containing the size
      */
     GuiComputedSize getComputedSize();
+
+    /**
+     * Returns the current element inner size (and caches it for further calls).
+     * The inner size is the element area excluding margin and padding.
+     * @return a structure containing the size
+     */
+    GuiComputedSize getComputedInnerSize();
 
     /**
      * This function is supposed to be only called internally; forces recalculation of the position coordinates and the

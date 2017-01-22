@@ -20,12 +20,24 @@ void GuiElement::setInlinePosAndSize(float x, float y, float w, float h) {
 }
 
 void GuiElement::buildInline(GuiInlineBuilder& builder) {
-    auto size = getComputedSize();
+    auto size = getComputedOuterSize();
     builder.add(size.width, size.height);
 }
 
 void GuiElement::setStyleState(GuiStyleState newState) {
     styleManager.updateState(newState);
+}
+
+GuiMargin GuiElement::getMargin() {
+    if (cdirty)
+        recalculatePosAndSize();
+    return cmargin;
+}
+
+GuiMargin GuiElement::getPadding() {
+    if (cdirty)
+        recalculatePosAndSize();
+    return cpadding;
 }
 
 GuiComputedPosition GuiElement::getComputedPosition() {
@@ -34,13 +46,30 @@ GuiComputedPosition GuiElement::getComputedPosition() {
     return {cleft, ctop};
 }
 
-GuiComputedSize GuiElement::getComputedSize() {
+GuiComputedSize GuiElement::getComputedOuterSize() {
     if (cdirty)
         recalculatePosAndSize();
     return {cwidth, cheight};
 }
 
+GuiComputedSize GuiElement::getComputedSize() {
+    GuiComputedSize size = getComputedOuterSize();
+    GuiMargin margin = getMargin();
+    return {size.width - margin.left - margin.right,
+            size.height - margin.top - margin.bottom};
+}
+
+GuiComputedSize GuiElement::getComputedInnerSize() {
+    GuiComputedSize size = getComputedSize();
+    GuiMargin padding = getPadding();
+    return {size.width - padding.left - padding.right,
+            size.height - padding.top - padding.bottom};
+}
+
 void GuiElement::recalculatePosAndSize() {
+    cmargin = {style().marginLeft(), style().marginTop(), style().marginRight(), style().marginBottom()};
+    cpadding = {style().paddingLeft(), style().paddingTop(), style().paddingRight(), style().paddingBottom()};
+
     float pwidth = cwidth;
     float pheight = cheight;
     if (style().display() != GuiDisplayMode::INLINE) {
@@ -52,7 +81,7 @@ void GuiElement::recalculatePosAndSize() {
 
     if (parent.expired() || style().display() != GuiDisplayMode::BLOCK)
         return;
-    GuiComputedSize ps = parent.lock()->getComputedSize();
+    GuiComputedSize ps = parent.lock()->getComputedInnerSize();
 
     float left = style().left();
     float right = style().right();

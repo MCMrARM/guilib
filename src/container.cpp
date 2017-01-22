@@ -7,14 +7,21 @@ GuiContainer::GuiContainer(std::weak_ptr<GuiElement> parent) : GuiElement(parent
 }
 
 void GuiContainer::draw(float x, float y) {
+    auto padding = getPadding();
+    x += padding.left;
+    y += padding.top;
     for (auto& line : inlineLines) {
         for (auto& el : line.elements) {
             auto gui = el.element.lock();
+            auto margin = gui->getMargin();
             if (el.isNonInline()) {
                 auto pos = gui->getComputedPosition();
-                gui->draw(x + pos.left, y + pos.top);
+                gui->draw(x + pos.left + margin.left, y + pos.top + margin.top);
             } else {
-                gui->draw(x + el.left, y + el.top, el.argLineNo);
+                if (gui->style().display() == GuiDisplayMode::INLINE)
+                    gui->draw(x + el.left, y + el.top, el.argLineNo);
+                else
+                    gui->draw(x + el.left + margin.left, y + el.top + margin.top, el.argLineNo);
             }
         }
     }
@@ -25,7 +32,7 @@ void GuiContainer::onSizeChanged() {
 }
 
 void GuiContainer::repositionElements() {
-    GuiInlineBuilder builder (getComputedSize().width);
+    GuiInlineBuilder builder (getComputedInnerSize().width);
     for (auto& el : elements) {
         GuiDisplayMode disp = el->style().display();
         if ((disp == GuiDisplayMode::INLINE || disp == GuiDisplayMode::INLINE_BLOCK) && el->isInlineSupported()) {
