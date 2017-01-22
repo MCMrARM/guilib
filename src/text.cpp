@@ -1,12 +1,14 @@
 #include <guilib/text.h>
 #include <guilib/font.h>
 #include <guilib/inline_builder.h>
+#include <utf8proc.h>
 
 using namespace guilib;
 
-extern "C" {
-int utf8proc_iterate(const uint8_t* str, size_t str_len, int32_t* dst);
-};
+GuiText::GuiText(std::weak_ptr<GuiElement> parent, std::string const& text) : GuiElement(parent), text(text),
+                                                                              styleManager(*this) {
+    font = GuiFont::defaultFont;
+}
 
 void GuiText::draw(float x, float y) {
     auto& color = style().textColor();
@@ -42,7 +44,7 @@ void GuiText::updateWordWrap(GuiInlineBuilder* builder) {
 
     int lineNo = 0, n, c;
     float w = 0.f;
-    while ((n = utf8proc_iterate(str, strslen - (str - strs), &c)) > 0) {
+    while ((n = (int) utf8proc_iterate(str, strslen - (str - strs), &c)) > 0) {
         if (c == ' ') {
             lastSpaceOff = str - strs;
         }
@@ -51,9 +53,10 @@ void GuiText::updateWordWrap(GuiInlineBuilder* builder) {
             drawLines.push_back(text.substr(lastAddedOff, lastSpaceOff - lastAddedOff));
             if (builder != nullptr) {
                 builder->add(w, lineHeight, lineNo);
+                builder->nextLine();
                 maxW = builder->getRemainingWidth();
             }
-            lastAddedOff = lastSpaceOff;
+            lastAddedOff = lastSpaceOff + 1;
             lineNo++;
             str = strs + lastSpaceOff + 1;
             w = 0.f;

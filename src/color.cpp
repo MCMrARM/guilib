@@ -18,6 +18,9 @@ GuiColor& GuiColor::operator*(GuiColor const& c) {
 }
 
 unsigned int GuiColor::toARGB() {
-    Color c = {r, g, b, a};
-    return c.toARGB();
+    unsigned int r = (unsigned int) (this->r * 255);
+    unsigned int g = (unsigned int) (this->g * 255);
+    unsigned int b = (unsigned int) (this->b * 255);
+    unsigned int a = 255 - (unsigned int) (this->a * 255);
+    return b | (g << 8) | (r << 16) | (a << 24);
 }

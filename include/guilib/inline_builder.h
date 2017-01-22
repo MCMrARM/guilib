@@ -12,6 +12,7 @@ struct GuiInlineLine {
     struct Element {
 
         std::weak_ptr<GuiElement> element;
+        float left, top;
         float width, height;
         int argLineNo;
 

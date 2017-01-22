@@ -24,7 +24,7 @@ void GuiInlineBuilder::add(std::weak_ptr<GuiElement> element, float width, float
     if (argLineNo < 0)
         throw std::logic_error("The line number must be >= 0");
     auto& line = this->lines.back();
-    line.elements.push_back({element, width, height, argLineNo});
+    line.elements.push_back({element, -1.f, -1.f, width, height, argLineNo});
     line.lineHeight = std::max(line.lineHeight, height);
     lineRemainingWidth -= width;
 }
@@ -37,4 +37,5 @@ void GuiInlineBuilder::addNonInline(std::weak_ptr<GuiElement> element) {
 
 void GuiInlineBuilder::nextLine() {
     this->lines.push_back(GuiInlineLine());
+    lineRemainingWidth = lineTotalWidth;
 }

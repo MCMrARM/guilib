@@ -10,8 +10,12 @@ void GuiContainer::draw(float x, float y) {
     for (auto& line : inlineLines) {
         for (auto& el : line.elements) {
             auto gui = el.element.lock();
-            auto pos = gui->getComputedPosition();
-            gui->draw(x + pos.left, y + pos.top);
+            if (el.isNonInline()) {
+                auto pos = gui->getComputedPosition();
+                gui->draw(x + pos.left, y + pos.top);
+            } else {
+                gui->draw(x + el.left, y + el.top, el.argLineNo);
+            }
         }
     }
 }
@@ -41,7 +45,10 @@ void GuiContainer::repositionElements() {
             if (el.isNonInline()) {
                 gui->onParentSizeChange();
             } else {
-                gui->setInlinePosAndSize(x, y, el.width, el.height);
+                el.left = x;
+                el.top = y;
+                if (el.argLineNo == 0)
+                    gui->setInlinePosAndSize(x, y, el.width, el.height);
                 x += el.width;
             }
         }

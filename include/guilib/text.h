@@ -30,7 +30,7 @@ public:
 
     virtual bool isInlineSupported() { return true; }
 
-    virtual void draw(float x, float y) = 0;
+    virtual void draw(float x, float y);
 
     virtual void draw(float x, float y, int mlLineNr);
 
