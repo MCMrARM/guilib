@@ -9,6 +9,7 @@
 namespace guilib {
 
 class GuiContainer;
+class GuiInlineBuilder;
 
 struct GuiComputedPosition {
     float left, top;
@@ -42,6 +43,10 @@ protected:
      */
     virtual void setStyleState(GuiStyleState newState);
 
+    friend class GuiContainer;
+
+    void setInlinePosAndSize(float x, float y, float w, float h);
+
 private:
 
     GuiStyleObjectData<GuiElementStyle> elementStyleData;
@@ -55,7 +60,35 @@ public:
 
     virtual ~GuiElement() { }
 
-    virtual void draw() = 0;
+    /**
+     * This function will be called to draw this element if it's a block or inline-block.
+     * @param x the absolute x (left) coordinate
+     * @param y the absolute y (top) coordinate
+     */
+    virtual void draw(float x, float y) = 0;
+
+    /**
+     * This function will be called to draw this element if it's an inline element. The multiline line number may be
+     * overridden by building a custom inline block structure via the buildInline function.
+     * @param x the absolute x (left) coordinate
+     * @param y the absolute y (top) coordinate
+     * @param mlLineNr the multiline line number (you can specify it by overriding buildInline)
+     */
+    virtual void draw(float x, float y, int mlLineNr) { draw(x, y); }
+
+    /**
+     * Build the inline representation of this element. The default implementation only support inline-block display
+     * mode, and requires a valid size calculation. Position will be ignored.
+     * @param builder an inline builder instance, used to build multiline elements
+     */
+    virtual void buildInline(GuiInlineBuilder& builder);
+
+    /**
+     * Check if this element can be used as a completely inline element (display: inline). Even if this is set to false,
+     * it'll support the inline-block display mode.
+     * @return can this element be inline?
+     */
+    virtual bool isInlineSupported() { return false; }
 
     /**
      * The function called when the size of this element changes. This will be called by all functions that update the

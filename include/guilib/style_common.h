@@ -2,6 +2,7 @@
 
 #include "ninepatch.h"
 #include "color.h"
+#include "display_mode.h"
 
 namespace guilib {
 

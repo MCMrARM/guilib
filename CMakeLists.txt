@@ -12,5 +12,5 @@ add_library(guilib SHARED
         include/guilib/ninepatch.h include/guilib/button.h include/guilib/text.h include/guilib/color.h
         src/color.cpp src/element.cpp include/guilib/style_props_element.h include/guilib/style_props_text.h
         include/guilib/style_def.h include/guilib/style_common.h include/guilib/style_props_common.h
-        include/guilib/style_def_callbacks.h src/container.cpp)
+        include/guilib/style_def_callbacks.h src/container.cpp include/guilib/display_mode.h include/guilib/inline_builder.h src/text.cpp include/guilib/font.h src/inline_builder.cpp)
 target_link_libraries(guilib ${TML_LIBRARIES} ${MINECRAFT_LIBRARIES})

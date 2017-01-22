@@ -1,4 +1,5 @@
 #include <guilib/element.h>
+#include <guilib/inline_builder.h>
 
 #define DEF_NAME GuiElement
 #define DEF_LISTH <guilib/style_props_element.h>
@@ -8,6 +9,19 @@ using namespace guilib;
 
 GuiElement::GuiElement(std::weak_ptr<GuiElement> parent) : parent(parent), styleManager(*this) {
     //
+}
+
+void GuiElement::setInlinePosAndSize(float x, float y, float w, float h) {
+    cleft = x;
+    ctop = y;
+    cwidth = w;
+    cheight = h;
+    cdirty = false;
+}
+
+void GuiElement::buildInline(GuiInlineBuilder& builder) {
+    auto size = getComputedSize();
+    builder.add(size.width, size.height);
 }
 
 void GuiElement::setStyleState(GuiStyleState newState) {
@@ -29,10 +43,14 @@ GuiComputedSize GuiElement::getComputedSize() {
 void GuiElement::recalculatePosAndSize() {
     float pwidth = cwidth;
     float pheight = cheight;
-    cwidth = style().width();
-    cheight = style().height();
+    if (style().display() != GuiDisplayMode::INLINE) {
+        if (pwidth != -1.f)
+            cwidth = style().width();
+        if (pheight != -1.f)
+            cheight = style().height();
+    }
 
-    if (parent.expired())
+    if (parent.expired() || style().display() != GuiDisplayMode::BLOCK)
         return;
     GuiComputedSize ps = parent.lock()->getComputedSize();
 
