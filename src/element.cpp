@@ -95,15 +95,17 @@ void GuiElement::recalculatePosAndSize() {
     float pwidth = cwidth;
     float pheight = cheight;
     if (style().display() != GuiDisplayMode::INLINE) {
-        if (pwidth != -1.f)
-            cwidth = style().width();
-        if (pheight != -1.f)
-            cheight = style().height();
+        float nwidth = style().width();
+        float nheight = style().height();
+        if (nwidth != -1.f)
+            cwidth = nwidth;
+        if (nheight != -1.f)
+            cheight = nheight;
     }
 
     if (parent.expired() || style().display() != GuiDisplayMode::BLOCK)
         return;
-    GuiComputedSize ps = parent.lock()->getComputedInnerSize();
+    GuiComputedSize ps = parent.lock()->getComputedSize();
 
     float left = style().left();
     float right = style().right();

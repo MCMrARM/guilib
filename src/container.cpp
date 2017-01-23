@@ -17,12 +17,12 @@ void GuiContainer::draw(float x, float y) {
             auto margin = gui->getMargin();
             if (el.isNonInline()) {
                 auto pos = gui->getComputedPosition();
-                gui->draw(x + pos.left + margin.left, y + pos.top + margin.top);
+                gui->draw(pos.left + margin.left, pos.top + margin.top);
             } else {
                 if (gui->style().display() == GuiDisplayMode::INLINE)
                     gui->draw(x + el.left, y + el.top, el.width, el.height, el.argLineNo);
                 else
-                    gui->draw(x + el.left + margin.left, y + el.top + margin.top, el.width, el.height, el.argLineNo);
+                    gui->draw(x + el.left + margin.left, y + el.top + margin.top);
             }
         }
     }

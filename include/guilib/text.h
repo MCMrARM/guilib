@@ -36,6 +36,8 @@ public:
 
     virtual void buildInline(GuiInlineBuilder& builder);
 
+    virtual void onSizeChanged();
+
     void notifyFontFamilyChanged();
 
 };

@@ -83,6 +83,14 @@ void GuiText::updateWordWrap(GuiInlineBuilder* builder) {
         builder->add(w, lineHeight, lineNo);
 }
 
+void GuiText::onSizeChanged() {
+    if (style().display() != GuiDisplayMode::INLINE)
+        updateWordWrap(nullptr);
+}
+
 void GuiText::buildInline(GuiInlineBuilder& builder) {
-    updateWordWrap(&builder);
+    if (style().display() == GuiDisplayMode::INLINE)
+        updateWordWrap(&builder);
+    else
+        GuiElement::buildInline(builder);
 }

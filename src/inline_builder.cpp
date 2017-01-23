@@ -32,7 +32,7 @@ void GuiInlineBuilder::add(std::weak_ptr<GuiElement> element, float width, float
 void GuiInlineBuilder::addNonInline(std::weak_ptr<GuiElement> element) {
     if (this->lines.size() == 0)
         nextLine();
-    this->lines.back().elements.push_back({element, 0.f, 0.f, -1});
+    this->lines.back().elements.push_back({element, 0.f, 0.f, 0.f, 0.f, -1});
 }
 
 void GuiInlineBuilder::nextLine() {
