@@ -51,6 +51,7 @@ void GuiText::updateWordWrap(GuiInlineBuilder* builder) {
 
     size_t lastAddedOff = 0;
     size_t lastSpaceOff = 0;
+    float lastSpaceW = 0.f;
 
     int lineNo = 0, n, c;
     float w = 0.f;
@@ -59,6 +60,7 @@ void GuiText::updateWordWrap(GuiInlineBuilder* builder) {
     while ((n = (int) utf8proc_iterate(str, strslen - (str - strs), &c)) > 0) {
         if (c == ' ') {
             lastSpaceOff = str - strs;
+            lastSpaceW = w;
         }
         w += font->getCharacterWidth(c);
         if (builder != nullptr && &str[n] == stre)
@@ -66,7 +68,7 @@ void GuiText::updateWordWrap(GuiInlineBuilder* builder) {
         if (w >= maxW) {
             drawLines.push_back(text.substr(lastAddedOff, lastSpaceOff - lastAddedOff));
             if (builder != nullptr) {
-                builder->add(w, lineHeight, lineNo);
+                builder->add(lastSpaceW, lineHeight, lineNo);
                 builder->nextLine();
                 maxW = builder->getRemainingWidth();
             }
