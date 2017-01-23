@@ -1,5 +1,6 @@
 #include <guilib/element.h>
 #include <guilib/inline_builder.h>
+#include <guilib/mesh.h>
 
 #define DEF_NAME GuiElement
 #define DEF_LISTH <guilib/style_props_element.h>
@@ -8,7 +9,28 @@
 using namespace guilib;
 
 GuiElement::GuiElement(std::weak_ptr<GuiElement> parent) : parent(parent), styleManager(*this) {
-    //
+    cmargin = {0.f, 0.f, 0.f, 0.f};
+    cpadding = {0.f, 0.f, 0.f, 0.f};
+}
+
+void GuiElement::draw(float x, float y) {
+    auto size = getComputedSize();
+    drawDecorations(x, y, size.width, size.height);
+}
+
+void GuiElement::drawDecorations(float x, float y, float width, float height, bool noLeftBorder, bool noRightBorder) {
+    auto bgColor = style().backgroundColor();
+    if (bgColor.a > 0.f) {
+        MeshBuilder builder;
+        builder.color(style().backgroundColor());
+        builder.vertex(x, y, 0.f);
+        builder.vertex(x, y + height, 0.f);
+        builder.vertex(x + width, y, 0.f);
+        builder.vertex(x, y + height, 0.f);
+        builder.vertex(x + width, y + height, 0.f);
+        builder.vertex(x + width, y, 0.f);
+        builder.build().draw();
+    }
 }
 
 void GuiElement::setInlinePosAndSize(float x, float y, float w, float h) {

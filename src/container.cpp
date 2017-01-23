@@ -7,6 +7,7 @@ GuiContainer::GuiContainer(std::weak_ptr<GuiElement> parent) : GuiElement(parent
 }
 
 void GuiContainer::draw(float x, float y) {
+    GuiElement::draw(x, y);
     auto padding = getPadding();
     x += padding.left;
     y += padding.top;
@@ -19,9 +20,9 @@ void GuiContainer::draw(float x, float y) {
                 gui->draw(x + pos.left + margin.left, y + pos.top + margin.top);
             } else {
                 if (gui->style().display() == GuiDisplayMode::INLINE)
-                    gui->draw(x + el.left, y + el.top, el.argLineNo);
+                    gui->draw(x + el.left, y + el.top, el.width, el.height, el.argLineNo);
                 else
-                    gui->draw(x + el.left + margin.left, y + el.top + margin.top, el.argLineNo);
+                    gui->draw(x + el.left + margin.left, y + el.top + margin.top, el.width, el.height, el.argLineNo);
             }
         }
     }

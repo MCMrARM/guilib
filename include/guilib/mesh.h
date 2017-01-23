@@ -10,4 +10,11 @@ class Mesh : public MeshImpl {
 
 };
 
+class MeshBuilder : public MeshBuilderImpl {
+
+public:
+
+
+};
+
 }

@@ -32,7 +32,7 @@ public:
 
     virtual void draw(float x, float y);
 
-    virtual void draw(float x, float y, int mlLineNr);
+    virtual void draw(float x, float y, float width, float height, int mlLineNr);
 
     virtual void buildInline(GuiInlineBuilder& builder);
 

@@ -36,6 +36,6 @@ add_executable(guilib
         include/guilib/style_def.h include/guilib/style_common.h include/guilib/style_props_common.h
         include/guilib/style_def_callbacks.h src/container.cpp include/guilib/display_mode.h
         include/guilib/inline_builder.h src/text.cpp include/guilib/font.h src/inline_builder.cpp
-        example/include/guilib/mesh_impl.h include/guilib/mesh.h example/src/window.cpp example/src/ascii_pixel_font.cpp example/src/ascii_pixel_font.h src/font.cpp)
+        example/include/guilib/mesh_impl.h include/guilib/mesh.h example/src/window.cpp example/src/ascii_pixel_font.cpp example/src/ascii_pixel_font.h src/font.cpp example/src/mesh_impl.cpp example/src/shader.cpp example/src/shader.h)
 target_link_libraries(guilib ${OPENGL_LIBRARIES} ${PNG_LIBRARIES} ${GLFW_LIBRARIES} ${EPOXY_LIBRARIES}
         ${UTF8PROC_LIBRARIES})

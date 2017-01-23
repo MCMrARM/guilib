@@ -11,6 +11,8 @@ GuiText::GuiText(std::weak_ptr<GuiElement> parent, std::string const& text) : Gu
 }
 
 void GuiText::draw(float x, float y) {
+    GuiElement::draw(x, y);
+
     auto padding = getPadding();
     x += padding.left;
     y += padding.top;
@@ -23,7 +25,8 @@ void GuiText::draw(float x, float y) {
     }
 }
 
-void GuiText::draw(float x, float y, int mlLineNr) {
+void GuiText::draw(float x, float y, float width, float height, int mlLineNr) {
+    drawDecorations(x, y, width, height, mlLineNr == 0, mlLineNr == drawLines.size() - 1);
     if (mlLineNr == 0)
         x += getPadding().left;
     font->draw(x, y, drawLines[mlLineNr], style().textColor());

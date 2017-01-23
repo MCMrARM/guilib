@@ -13,7 +13,7 @@ class DEF_NAME;
 
 struct STYLE_NAME(DEF_NAME) {
 
-#define STYLE_PROP(name, cssname, type, def, cb) GuiStyleProperty<type> name;
+#define STYLE_PROP(name, cssname, type, def, cb) GuiStyleProperty<type> name = def;
 #include DEF_LISTH
 #undef STYLE_PROP
 

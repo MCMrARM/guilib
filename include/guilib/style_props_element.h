@@ -16,5 +16,5 @@ STYLE_PROP(paddingBottom, padding-bottom, float, 0.f, { el.notifyPositionDataCha
 STYLE_PROP2(display, display, GuiDisplayMode, GuiDisplayMode::BLOCK)
 STYLE_PROP2(borderWidth, border-width, float, 0.f)
 STYLE_PROP2(borderColor, border-color, GuiColor, GuiColor())
-STYLE_PROP2(backgroundColor, background-color, GuiColor, GuiColor())
+STYLE_PROP2(backgroundColor, background-color, GuiColor, GuiColor(1.f, 1.f, 1.f, 0.f))
 STYLE_PROP2(backgroundImage, background-image, GuiNinepatchImage, GuiNinepatchImage())

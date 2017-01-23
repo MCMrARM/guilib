@@ -17,6 +17,8 @@ private:
 
 public:
 
+    GuiStyleProperty(T def) : currentValue(def) { }
+
     T const& get() const { return currentValue; }
 
     bool isSet() const { return valueSet; }

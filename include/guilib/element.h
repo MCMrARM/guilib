@@ -51,6 +51,18 @@ protected:
 
     void setInlinePosAndSize(float x, float y, float w, float h);
 
+    /**
+     * This function will be called before draw, to draw this element's decorations (border, background, etc).
+     * @param x the absolute x (left) coordinate
+     * @param y the absolute y (top) coordinate
+     * @param width maximal width of the decorations
+     * @param height maximal height of the decorations
+     * @param noLeftBorder disable rendering of the left border
+     * @param noRightBorder disable rendering of the right border
+     */
+    virtual void drawDecorations(float x, float y, float width, float height,
+                                 bool noLeftBorder = false, bool noRightBorder = false);
+
 private:
 
     GuiStyleObjectData<GuiElementStyle> elementStyleData;
@@ -69,16 +81,18 @@ public:
      * @param x the absolute x (left) coordinate
      * @param y the absolute y (top) coordinate
      */
-    virtual void draw(float x, float y) = 0;
+    virtual void draw(float x, float y);
 
     /**
      * This function will be called to draw this element if it's an inline element. The multiline line number may be
      * overridden by building a custom inline block structure via the buildInline function.
      * @param x the absolute x (left) coordinate
      * @param y the absolute y (top) coordinate
+     * @param width the width of the element on the multiline line
+     * @param height the height of the element on the multiline line
      * @param mlLineNr the multiline line number (you can specify it by overriding buildInline)
      */
-    virtual void draw(float x, float y, int mlLineNr) { draw(x, y); }
+    virtual void draw(float x, float y, float width, float height, int mlLineNr) { draw(x, y); }
 
     /**
      * Build the inline representation of this element. The default implementation only support inline-block display
