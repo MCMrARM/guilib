@@ -38,10 +38,44 @@ std::shared_ptr<GuiContainer> createTestUi(float w, float h) {
     text2->style().backgroundColor(GuiColor(0x00FF00));
     text2->style().display(GuiDisplayMode::INLINE);
     container->addElement(text2);
+    std::shared_ptr<GuiText> text3(new GuiText(container, "If this will work it'll be perfect."));
+    text3->style().textColor(GuiColor(0xFFFF00));
+    text3->style().backgroundColor(GuiColor(0xFF0000));
+    text3->style().width(50.f);
+    text3->style().height(50.f);
+    text3->style().display(GuiDisplayMode::INLINE_BLOCK);
+    container->addElement(text3);
+
+    std::shared_ptr<GuiContainer> container2(new GuiContainer(container));
+    container2->style().left(0.f);
+    container2->style().right(0.f);
+    container2->style().bottom(0.f);
+    container2->style().height(50.f);
+    container2->style().paddingLeft(5.f);
+    container2->style().paddingTop(5.f);
+    container2->style().paddingRight(5.f);
+    container2->style().paddingBottom(5.f);
+    container2->style().backgroundColor(GuiColor(0xFF0000));
+    container2->style().display(GuiDisplayMode::BLOCK);
+    std::shared_ptr<GuiText> text4(new GuiText(container, "This is a bottom container"));
+    text4->style().backgroundColor(GuiColor(0xFFFF00));
+    text4->style().display(GuiDisplayMode::INLINE);
+    container2->addElement(text4);
+    container->addElement(container2);
+
     container->repositionElements();
     return std::move(container);
 }
 
+void setProjectionSize(float w, float h) {
+    float newProjMatrix[16] = {
+            2.f / w, 0.f, 0.f, 0.f,
+            0.f, -2.f / h, 0.f, 0.f,
+            0.f, 0.f, 1.f, 0.f,
+            -1.f, 1.f, 0.f, 1.f
+    };
+    memcpy(projMatrix, newProjMatrix, sizeof(newProjMatrix));
+}
 
 int main()
 {
@@ -52,7 +86,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
     GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Guilib", NULL, NULL);
     glfwMakeContextCurrent(window);
@@ -67,18 +101,10 @@ int main()
 
     glfwSetKeyCallback(window, key_callback);
 
-    glViewport(0, 0, windowWidth, windowHeight);
-
     ShaderProgram::defaultColorShader = ShaderProgram::fromFiles("shader/color.vert", "shader/color.frag");
     glUseProgram(ShaderProgram::defaultColorShader.getId());
 
-    float newProjMatrix[16] = {
-            2.f / guiWidth, 0.f, 0.f, 0.f,
-            0.f, -2.f / guiHeight, 0.f, 0.f,
-            0.f, 0.f, 1.f, 0.f,
-            -1.f, 1.f, 0.f, 1.f
-    };
-    memcpy(projMatrix, newProjMatrix, sizeof(newProjMatrix));
+    setProjectionSize(guiWidth, guiHeight);
 
     std::shared_ptr<GuiFont> font(new GuiPixelFont());
     GuiFont::registerFont(font);
@@ -88,6 +114,16 @@ int main()
 
     while (!glfwWindowShouldClose(window))
     {
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        guiWidth = width / 2.f;
+        guiHeight = height / 2.f;
+        glViewport(0, 0, width, height);
+        setProjectionSize(guiWidth, guiHeight);
+        testUi->style().width(guiWidth);
+        testUi->style().height(guiHeight);
+        testUi->repositionElements();
+
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
