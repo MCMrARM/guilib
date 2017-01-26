@@ -3,7 +3,7 @@
 in vec4 vColor;
 out vec4 oColor;
 
-void main(void)
+void main()
 {
     oColor = vColor;
 }

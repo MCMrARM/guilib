@@ -1,6 +1,6 @@
 #include <guilib/element.h>
 #include <guilib/inline_builder.h>
-#include <guilib/mesh.h>
+#include <guilib/mesh_builder.h>
 
 #define DEF_NAME GuiElement
 #define DEF_LISTH <guilib/style_props_element.h>
@@ -144,6 +144,5 @@ void GuiElement::onParentSizeChange() {
 }
 
 void GuiElement::notifyPositionDataChanged() {
-    printf("NotifyPositionDataChanged\n");
     cdirty = true;
 }

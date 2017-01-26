@@ -9,8 +9,11 @@
 #include <guilib/text.h>
 #include <guilib/font.h>
 #include <guilib/mesh.h>
+#include <guilib/mesh_builder.h>
+#include <guilib/texture.h>
 #include "ascii_pixel_font.h"
 #include "shader.h"
+#include "image.h"
 
 using namespace guilib;
 
@@ -102,11 +105,11 @@ int main()
     glfwSetKeyCallback(window, key_callback);
 
     ShaderProgram::defaultColorShader = ShaderProgram::fromFiles("shader/color.vert", "shader/color.frag");
-    glUseProgram(ShaderProgram::defaultColorShader.getId());
+    ShaderProgram::defaultTexShader = ShaderProgram::fromFiles("shader/tex.vert", "shader/tex.frag");
 
     setProjectionSize(guiWidth, guiHeight);
 
-    std::shared_ptr<GuiFont> font(new GuiPixelFont());
+    std::shared_ptr<GuiFont> font(new GuiPixelFont("image/font.png"));
     GuiFont::registerFont(font);
     std::shared_ptr<GuiContainer> testUi (createTestUi(guiWidth, guiHeight));
 

@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 ShaderProgram ShaderProgram::defaultColorShader;
+ShaderProgram ShaderProgram::defaultTexShader;
 
 void ShaderProgram::compileShader(GLuint shader) {
     glCompileShader(shader);
@@ -60,10 +61,11 @@ ShaderProgram::ShaderProgram(std::string const& vert, std::string const& frag) {
     }
 
     glUseProgram(id);
-    posAttr = (GLuint) glGetAttribLocation(id, "position");
-    colAttr = (GLuint) glGetAttribLocation(id, "color");
-    uvAttr = (GLuint) glGetAttribLocation(id, "uv");
-    projUni = (GLuint) glGetUniformLocation(id, "projection");
+    posAttr = glGetAttribLocation(id, "position");
+    colAttr = glGetAttribLocation(id, "color");
+    uvAttr = glGetAttribLocation(id, "uv");
+    projUni = glGetUniformLocation(id, "projection");
+    samplerUni = glGetUniformLocation(id, "textureSampler");
 }
 
 ShaderProgram::ShaderProgram(ShaderProgram&& prog) : id(prog.id), posAttr(prog.posAttr), colAttr(prog.colAttr),
@@ -81,6 +83,7 @@ ShaderProgram& ShaderProgram::operator=(ShaderProgram&& prog) {
     colAttr = prog.colAttr;
     uvAttr = prog.uvAttr;
     projUni = prog.projUni;
+    samplerUni = prog.samplerUni;
     prog.hasId = false;
     prog.id = 0;
     return *this;

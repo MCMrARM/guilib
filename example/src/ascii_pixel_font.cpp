@@ -1,4 +1,13 @@
 #include "ascii_pixel_font.h"
+#include "image.h"
+
+#include <fstream>
+
+GuiPixelFont::GuiPixelFont(std::string const& fontPath) {
+    std::ifstream stream (fontPath);
+    Image image = Image::fromStream(stream);
+    printf("Test\n");
+}
 
 float GuiPixelFont::getCharacterWidth(int c) {
     return 4.f;

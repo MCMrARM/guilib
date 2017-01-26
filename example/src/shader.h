@@ -10,7 +10,7 @@ private:
     GLuint id;
     bool hasId = false;
     GLint posAttr, colAttr, uvAttr;
-    GLint projUni;
+    GLint projUni, samplerUni;
 
     static void compileShader(GLuint shader);
 
@@ -36,8 +36,11 @@ public:
 
     GLint getProjMatrixUniform() const { return projUni; }
 
+    GLint getSamplerUniform() const { return samplerUni; }
+
     static ShaderProgram fromFiles(std::string vertexPath, std::string fragmentPath);
 
     static ShaderProgram defaultColorShader;
+    static ShaderProgram defaultTexShader;
 
 };

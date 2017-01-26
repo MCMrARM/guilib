@@ -1,19 +1,27 @@
 #pragma once
 
-#include <guilib/mesh_impl.h>
+#include "mesh_impl.h"
 
 namespace guilib {
 
-class Mesh : public MeshImpl {
+class Mesh {
 
-    //
+private:
 
-};
-
-class MeshBuilder : public MeshBuilderImpl {
+    MeshImpl _impl;
 
 public:
 
+    Mesh() { }
+    Mesh(MeshImpl&& impl) : _impl(std::move(impl)) { }
+    Mesh(Mesh&& mesh) : _impl(std::move(mesh._impl)) { }
+
+    void draw() { _impl.draw(); }
+
+    Mesh& operator=(Mesh&& mesh) {
+        _impl = std::move(mesh._impl);
+        return *this;
+    }
 
 };
 
