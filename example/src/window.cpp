@@ -31,7 +31,7 @@ std::shared_ptr<GuiContainer> createTestUi(float w, float h) {
     container->style().backgroundColor(GuiColor(0x555555));
     std::shared_ptr<GuiText> text(new GuiText(container, "This is a really long test text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus."));
     text->style().textColor(GuiColor(0x000000));
-    text->style().backgroundColor(GuiColor(0xFFFF00));
+    text->style().backgroundColor(GuiColor(0x808000));
     text->style().display(GuiDisplayMode::INLINE);
     text->style().paddingLeft(10.f);
     text->style().paddingRight(10.f);
@@ -61,7 +61,7 @@ std::shared_ptr<GuiContainer> createTestUi(float w, float h) {
     container2->style().backgroundColor(GuiColor(0xFF0000));
     container2->style().display(GuiDisplayMode::BLOCK);
     std::shared_ptr<GuiText> text4(new GuiText(container, "This is a bottom container"));
-    text4->style().backgroundColor(GuiColor(0xFFFF00));
+    text4->style().backgroundColor(GuiColor(0x808000));
     text4->style().display(GuiDisplayMode::INLINE);
     container2->addElement(text4);
     container->addElement(container2);

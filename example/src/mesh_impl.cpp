@@ -47,13 +47,9 @@ void MeshImpl::draw() {
     glUseProgram(program->getId());
     glBindVertexArray((GLuint) vaoId);
 
-    if (texture) {
-        glUniform1i(program->getSamplerUniform(), 0);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture->getImpl().getId());
-        glBindSampler(0, texture->getImpl().getSamplerId());
-    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(0);
 
     glUniformMatrix4fv(ShaderProgram::defaultColorShader.getProjMatrixUniform(), 1, GL_FALSE, projMatrix);
     glDrawArrays(GL_TRIANGLES, 0, vertexCount);

@@ -49,11 +49,11 @@ Image Image::fromStream(std::istream& stream) {
         png_read_update_info(png_ptr, info_ptr);
     }
     if (colorType == PNG_COLOR_TYPE_PALETTE && depth <= 8) {
+        png_set_palette_to_rgb(png_ptr);
         if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
-            png_set_expand(png_ptr);
-            format = ImageFormat::RGB;
+            png_set_tRNS_to_alpha(png_ptr);
+            format = ImageFormat::RGBA;
         } else {
-            png_set_palette_to_rgb(png_ptr);
             format = ImageFormat::RGB;
         }
         png_read_update_info(png_ptr, info_ptr);

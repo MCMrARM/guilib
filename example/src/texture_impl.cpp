@@ -28,14 +28,14 @@ TextureImpl::TextureImpl(Image const& image) {
                  image.getData().data());
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenSamplers(1, &samplerId);
     glSamplerParameteri(samplerId, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glSamplerParameteri(samplerId, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glSamplerParameteri(samplerId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glSamplerParameteri(samplerId, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glSamplerParameterf(samplerId, GL_TEXTURE_MAX_ANISOTROPY_EXT, 16.0f);
 }
 
 TextureImpl::TextureImpl(TextureImpl&& impl) : id(impl.id), hasId(impl.hasId) {

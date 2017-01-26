@@ -1,8 +1,14 @@
 #pragma once
 
 #include <guilib/font.h>
+#include <guilib/texture.h>
 
 class GuiPixelFont : public guilib::GuiFont {
+
+private:
+
+    std::shared_ptr<guilib::Texture> fontTex;
+    int w, h;
 
 public:
 
