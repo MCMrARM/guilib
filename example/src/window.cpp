@@ -44,8 +44,8 @@ std::shared_ptr<GuiContainer> createTestUi(float w, float h) {
     std::shared_ptr<GuiText> text3(new GuiText(container, "If this will work it'll be perfect."));
     text3->style().textColor(GuiColor(0xFFFF00));
     text3->style().backgroundColor(GuiColor(0xFF0000));
-    text3->style().width(50.f);
-    text3->style().height(50.f);
+    text3->style().width(100.f);
+    text3->style().height(100.f);
     text3->style().display(GuiDisplayMode::INLINE_BLOCK);
     container->addElement(text3);
 

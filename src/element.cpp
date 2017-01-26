@@ -103,8 +103,11 @@ void GuiElement::recalculatePosAndSize() {
             cheight = nheight;
     }
 
-    if (parent.expired() || style().display() != GuiDisplayMode::BLOCK)
+    if (parent.expired() || style().display() != GuiDisplayMode::BLOCK) {
+        if (pwidth != cwidth || pheight != cheight)
+            onSizeChanged();
         return;
+    }
     GuiComputedSize ps = parent.lock()->getComputedSize();
 
     float left = style().left();

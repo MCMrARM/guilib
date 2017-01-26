@@ -72,10 +72,13 @@ void GuiText::updateWordWrap(GuiInlineBuilder* builder) {
                 builder->nextLine();
                 maxW = builder->getRemainingWidth();
             }
-            lastAddedOff = lastSpaceOff + 1;
+            lastAddedOff = lastSpaceOff;
+            if (lastSpaceOff != 0)
+                lastAddedOff++;
             lineNo++;
-            str = strs + lastSpaceOff + 1;
+            str = strs + lastAddedOff;
             w = 0.f;
+            continue;
         }
 
         str = &str[n];
