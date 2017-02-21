@@ -5,6 +5,11 @@
 #include "ninepatch.h"
 #include "element.h"
 #include "inline_builder.h"
+#include "layout_properties.h"
+
+#define DEF_NAME GuiContainer
+#define DEF_LISTH "style_props_container.h"
+#include "style_def.h"
 
 namespace guilib {
 
@@ -12,6 +17,8 @@ class GuiElement;
 class GuiNinepatchTexture;
 
 class GuiContainer : public GuiElement {
+
+    GUI_OBJECT_STYLE(GuiContainer, GuiElement)
 
 private:
 

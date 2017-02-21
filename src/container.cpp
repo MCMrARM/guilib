@@ -2,7 +2,7 @@
 
 using namespace guilib;
 
-GuiContainer::GuiContainer(std::weak_ptr<GuiElement> parent) : GuiElement(parent) {
+GuiContainer::GuiContainer(std::weak_ptr<GuiElement> parent) : GuiElement(parent), styleManager(*this){
     //
 }
 
@@ -44,24 +44,7 @@ void GuiContainer::repositionElements() {
         }
     }
     builder.resetElement();
-    inlineLines = builder.build();
-    float y = 0.f;
-    for (auto& line : inlineLines) {
-        float x = 0.f;
-        for (auto& el : line.elements) {
-            auto gui = el.element.lock();
-            if (el.isNonInline()) {
-                gui->onParentSizeChange();
-            } else {
-                el.left = x;
-                el.top = y;
-                if (el.argLineNo == 0)
-                    gui->setInlinePosAndSize(x, y, el.width, el.height);
-                x += el.width;
-            }
-        }
-        y += line.lineHeight;
-    }
+    inlineLines = builder.buildAndAlign(style().textAlign());
 }
 
 void GuiContainer::addElement(std::shared_ptr<GuiElement> element) {

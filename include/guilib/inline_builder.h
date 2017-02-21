@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <vector>
+#include "layout_properties.h"
 
 namespace guilib {
 
@@ -50,7 +51,7 @@ public:
 
     void nextLine();
 
-    std::vector<GuiInlineLine> build() { return std::move(lines); }
+    std::vector<GuiInlineLine> buildAndAlign(GuiTextAlign align);
 
     float getRemainingWidth() const { return lineRemainingWidth; }
 

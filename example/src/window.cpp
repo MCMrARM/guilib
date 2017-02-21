@@ -29,6 +29,7 @@ std::shared_ptr<GuiContainer> createTestUi(float w, float h) {
     container->style().paddingRight(50.f);
     container->style().paddingTop(5.f);
     container->style().backgroundColor(GuiColor(0x555555));
+    container->style().textAlign(GuiTextAlign::CENTER);
     std::shared_ptr<GuiText> text(new GuiText(container, "This is a really long test text. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin nibh augue, suscipit a, scelerisque sed, lacinia in, mi. Cras vel lorem. Etiam pellentesque aliquet tellus. Phasellus pharetra nulla ac diam. Quisque semper justo at risus."));
     text->style().textColor(GuiColor(0x000000));
     text->style().backgroundColor(GuiColor(0x808000));

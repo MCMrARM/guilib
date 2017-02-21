@@ -1,4 +1,5 @@
 #include <guilib/inline_builder.h>
+#include <guilib/element.h>
 
 using namespace guilib;
 
@@ -33,6 +34,48 @@ void GuiInlineBuilder::addNonInline(std::weak_ptr<GuiElement> element) {
     if (this->lines.size() == 0)
         nextLine();
     this->lines.back().elements.push_back({element, 0.f, 0.f, 0.f, 0.f, -1});
+}
+
+std::vector<GuiInlineLine> GuiInlineBuilder::buildAndAlign(GuiTextAlign align) {
+    float y = 0.f;
+    for (auto& line : lines) {
+        float x = 0.f;
+        for (auto& el : line.elements) {
+            auto gui = el.element.lock();
+            if (el.isNonInline()) {
+                gui->onParentSizeChange();
+            } else {
+                el.left = x;
+                el.top = y;
+                if (el.argLineNo == 0)
+                    gui->setInlinePosAndSize(x, y, el.width, el.height);
+                x += el.width;
+            }
+        }
+        float w = x;
+
+        float off = 0.f;
+        switch (align) {
+            case GuiTextAlign::LEFT:
+                off = 0.f;
+                break;
+            case GuiTextAlign::RIGHT:
+                off = lineTotalWidth - w;
+                break;
+            case GuiTextAlign::CENTER:
+                off = lineTotalWidth / 2 - w / 2;
+                break;
+            case GuiTextAlign::JUSTIFY:
+                // TODO:
+                break;
+        }
+        for (auto& el : line.elements)
+            if (!el.isNonInline())
+                el.left += off;
+
+        y += line.lineHeight;
+    }
+    return std::move(lines);
 }
 
 void GuiInlineBuilder::nextLine() {

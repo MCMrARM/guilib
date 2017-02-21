@@ -47,7 +47,7 @@ protected:
      */
     virtual void setStyleState(GuiStyleState newState);
 
-    friend class GuiContainer;
+    friend class GuiInlineBuilder;
 
     void setInlinePosAndSize(float x, float y, float w, float h);
 

@@ -41,6 +41,6 @@ add_executable(guilib
         example/src/mesh_impl.h example/src/mesh_builder_impl.h example/src/texture_impl.h example/src/shader.h
         example/src/image.h example/src/ascii_pixel_font.h
         example/src/window.cpp example/src/ascii_pixel_font.cpp example/src/mesh_impl.cpp example/src/texture_impl.cpp
-        example/src/mesh_builder_impl.cpp example/src/shader.cpp example/src/image.cpp)
+        example/src/mesh_builder_impl.cpp example/src/shader.cpp example/src/image.cpp include/guilib/style_props_container.h include/guilib/layout_properties.h)
 target_link_libraries(guilib ${OPENGL_LIBRARIES} ${PNG_LIBRARIES} ${GLFW_LIBRARIES} ${EPOXY_LIBRARIES}
         ${UTF8PROC_LIBRARIES})
