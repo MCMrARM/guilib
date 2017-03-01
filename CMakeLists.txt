@@ -38,7 +38,7 @@ add_executable(guilib
         include/guilib/inline_builder.h include/guilib/mesh.h include/guilib/mesh_builder.h include/guilib/font.h
         src/color.cpp src/element.cpp src/container.cpp src/text.cpp src/inline_builder.cpp src/font.cpp
         include/guilib/style_props_container.h include/guilib/layout_properties.h include/guilib/css_tokenizer.h
-        src/css_tokenizer.cpp
+        src/css_tokenizer.cpp src/string_util.cpp
 
         example/src/mesh_impl.h example/src/mesh_builder_impl.h example/src/texture_impl.h example/src/shader.h
         example/src/image.h example/src/ascii_pixel_font.h
