@@ -13,6 +13,7 @@ enum TokenType {
     COLON, SEMICOLON, COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE, BRACKET_OPEN, BRACKET_CLOSE,
     CURELY_BRACKET_OPEN, CURELY_BRACKET_CLOSE, END_OF_FILE
 };
+std::string TokenTypeToString(TokenType type);
 
 struct HashToken {
     bool isId;
@@ -57,6 +58,15 @@ public:
 
     operator bool() { return type != TokenType::INVALID; }
 
+    TokenType getType() { return type; }
+    bool isEOF() const { return type == TokenType::END_OF_FILE; }
+    bool isHash() const { return type == TokenType::HASH; }
+    bool isString() const { return type == TokenType::STRING || type == TokenType::BAD_STRING; }
+    bool isNumber() const { return type == TokenType::NUMBER; }
+    bool isPercentage() const { return type == TokenType::PERCENTAGE; }
+    bool isDimension() const { return type == TokenType::DIMENSION; }
+    bool isIdentifier() const { return type == TokenType::IDENT; }
+
     HashToken const& asHash() const { return hash; }
     StringToken const& asString() const { return string; }
     NumberToken const& asNumber() const { return number; }
@@ -68,6 +78,7 @@ public:
     DelimToken const& asDelim() const { return delim; }
     UnicodeRangeToken const& asUnicodeRange() const { return unicodeRange; }
 
+    std::string toDebugString() const;
 
 };
 

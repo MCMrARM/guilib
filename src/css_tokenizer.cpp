@@ -1,9 +1,63 @@
 #include <guilib/css_tokenizer.h>
 
 #include <cmath>
+#include <sstream>
 #include <guilib/string_util.h>
 
 using namespace guilib::css;
+
+std::string guilib::css::TokenTypeToString(TokenType type) {
+    switch (type) {
+        case IDENT: return "IDENT";
+        case FUNCTION: return "FUNCTION";
+        case AT_KEYWORD: return "AT_KEYWORD";
+        case HASH: return "HASH";
+        case STRING: return "STRING";
+        case BAD_STRING: return "BAD_STRING";
+        case URL: return "URL";
+        case BAD_URL: return "BAD_URL";
+        case DELIM: return "DELIM";
+        case NUMBER: return "NUMBER";
+        case PERCENTAGE: return "PERCENTAGE";
+        case DIMENSION: return "DIMENSION,";
+        case UNICODE_RANGE: return "UNICODE_RANGE";
+        case INCLUDE_MATCH: return "INCLUDE_MATCH";
+        case DASH_MATCH: return "DASH_MATCH";
+        case PREFIX_MATCH: return "PREFIX_MATCH";
+        case SUFFIX_MATCH: return "SUFFIX_MATCH";
+        case SUBSTRING_MATCH: return "SUBSTRING_MATCH";
+        case COLUMN: return "COLUMN";
+        case WHITESPACE: return "WHITESPACE";
+        case CDO: return "CDO";
+        case CDC: return "CDC,";
+        case COLON: return "COLON";
+        case SEMICOLON: return "SEMICOLON";
+        case COMMA: return "COMMA";
+        case SQUARE_BRACKET_OPEN: return "SQUARE_BRACKET_OPEN";
+        case SQUARE_BRACKET_CLOSE: return "SQUARE_BRACKET_CLOSE";
+        case BRACKET_OPEN: return "BRACKET_OPEN";
+        case BRACKET_CLOSE: return "BRACKET_CLOSE,";
+        case CURELY_BRACKET_OPEN: return "CURELY_BRACKET_OPEN";
+        case CURELY_BRACKET_CLOSE: return "CURELY_BRACKET_CLOSE";
+        case END_OF_FILE: return "END_OF_FILE";
+        default: return "INVALID";
+    }
+}
+
+std::string Token::toDebugString() const {
+    std::stringstream ss;
+    ss << TokenTypeToString(type);
+    if (isHash())
+        ss << " name: " << asHash().name << ", isIt: " << asHash().isId;
+    if (isString() || isIdentifier())
+        ss << " value: " << asString().value;
+    if (isNumber() || isPercentage())
+        ss << " value: " << asNumber().number;
+    if (isDimension())
+        ss << " value: " << asDimension().number.number << ", unit: " << asDimension().unit;
+
+    return ss.str();
+}
 
 Tokenizer::Tokenizer(std::istream& stream) : stream(stream) {
     for (int i = 0; i < 3; i++)
