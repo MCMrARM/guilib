@@ -19,7 +19,7 @@ std::string guilib::css::TokenTypeToString(TokenType type) {
         case DELIM: return "DELIM";
         case NUMBER: return "NUMBER";
         case PERCENTAGE: return "PERCENTAGE";
-        case DIMENSION: return "DIMENSION,";
+        case DIMENSION: return "DIMENSION";
         case UNICODE_RANGE: return "UNICODE_RANGE";
         case INCLUDE_MATCH: return "INCLUDE_MATCH";
         case DASH_MATCH: return "DASH_MATCH";
@@ -36,7 +36,7 @@ std::string guilib::css::TokenTypeToString(TokenType type) {
         case SQUARE_BRACKET_OPEN: return "SQUARE_BRACKET_OPEN";
         case SQUARE_BRACKET_CLOSE: return "SQUARE_BRACKET_CLOSE";
         case BRACKET_OPEN: return "BRACKET_OPEN";
-        case BRACKET_CLOSE: return "BRACKET_CLOSE,";
+        case BRACKET_CLOSE: return "BRACKET_CLOSE";
         case CURELY_BRACKET_OPEN: return "CURELY_BRACKET_OPEN";
         case CURELY_BRACKET_CLOSE: return "CURELY_BRACKET_CLOSE";
         case END_OF_FILE: return "END_OF_FILE";
@@ -49,12 +49,16 @@ std::string Token::toDebugString() const {
     ss << TokenTypeToString(type);
     if (isHash())
         ss << " name: " << asHash().name << ", isIt: " << asHash().isId;
-    if (isString() || isIdentifier())
+    if (isString() || isIdentifier() || isFunction() || isUrl())
         ss << " value: " << asString().value;
     if (isNumber() || isPercentage())
         ss << " value: " << asNumber().number;
     if (isDimension())
         ss << " value: " << asDimension().number.number << ", unit: " << asDimension().unit;
+    if (isDelim())
+        ss << " codePoint: " << asDelim().codePoint;
+    if (isUnicodeRange())
+        ss << " start: " << asUnicodeRange().start << ", end: " << asUnicodeRange().end;
 
     return ss.str();
 }
@@ -137,13 +141,14 @@ std::string Tokenizer::consumeName() {
     std::string str;
     int c;
     while (true) {
-        c = consume();
+        c = peek(0);
         if (isNameCodePoint(c))
             StrUtil::appendUTF8Char(str, c);
         else if (isValidEscape(c, peek(1)))
             StrUtil::appendUTF8Char(str, consumeEscapedCodePoint());
         else
             break;
+        consume();
     }
     return str;
 }

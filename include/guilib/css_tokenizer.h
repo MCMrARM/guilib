@@ -66,6 +66,10 @@ public:
     bool isPercentage() const { return type == TokenType::PERCENTAGE; }
     bool isDimension() const { return type == TokenType::DIMENSION; }
     bool isIdentifier() const { return type == TokenType::IDENT; }
+    bool isFunction() const { return type == TokenType::FUNCTION; }
+    bool isUrl() const { return type == TokenType::URL || type == TokenType::BAD_URL; }
+    bool isDelim() const { return type == TokenType::DELIM; }
+    bool isUnicodeRange() const { return type == TokenType::UNICODE_RANGE; }
 
     HashToken const& asHash() const { return hash; }
     StringToken const& asString() const { return string; }

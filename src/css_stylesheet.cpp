@@ -9,10 +9,10 @@ Stylesheet::Stylesheet(std::istream& stream) {
     Token token (TokenType::INVALID);
     std::string indent;
     while (!(token = tokenizer.next()).isEOF()) {
-        if (token.getType() == TokenType::CURELY_BRACKET_OPEN)
-            indent.push_back(' ');
-        else if (token.getType() == TokenType::CURELY_BRACKET_CLOSE)
+        if (token.getType() == TokenType::CURELY_BRACKET_CLOSE || token.getType() == TokenType::BRACKET_CLOSE)
             indent.pop_back();
         std::cout << indent << token.toDebugString() << "\n";
+        if (token.getType() == TokenType::CURELY_BRACKET_OPEN || token.getType() == TokenType::BRACKET_OPEN)
+            indent.push_back(' ');
     }
 }
