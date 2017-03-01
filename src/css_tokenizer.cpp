@@ -5,12 +5,12 @@
 
 using namespace guilib::css;
 
-CssTokenizer::CssTokenizer(std::istream& stream) : stream(stream) {
+Tokenizer::Tokenizer(std::istream& stream) : stream(stream) {
     for (int i = 0; i < 3; i++)
         nextChars[i] = stream.get();
 }
 
-int CssTokenizer::consume() {
+int Tokenizer::consume() {
     int ret = nextChars[0];
     for (int i = 0; i < 2; i++)
         nextChars[i] = nextChars[i + 1];
@@ -18,23 +18,23 @@ int CssTokenizer::consume() {
     return ret;
 }
 
-void CssTokenizer::consume(int n) {
+void Tokenizer::consume(int n) {
     while (n--)
         consume();
 }
 
-int CssTokenizer::peek(int i) {
+int Tokenizer::peek(int i) {
     return nextChars[i];
 }
 
-void CssTokenizer::reconsume(int c) {
+void Tokenizer::reconsume(int c) {
     stream.putback((char) nextChars[2]);
     for (int i = 2; i >= 1; i--)
         nextChars[i] = nextChars[i - 1];
     nextChars[0] = c;
 }
 
-bool CssTokenizer::willStartNumber(int i, int j, int k) {
+bool Tokenizer::willStartNumber(int i, int j, int k) {
     if (i == '+' || i == '-')
         return isDigit(j) || (j == '.' && isDigit(k));
     if (i == '.' && isDigit(j))
@@ -42,7 +42,7 @@ bool CssTokenizer::willStartNumber(int i, int j, int k) {
     return isDigit(i);
 }
 
-bool CssTokenizer::willStartIdentifier(int i, int j, int k) {
+bool Tokenizer::willStartIdentifier(int i, int j, int k) {
     if (i == '-')
         return (isNameCodePoint(j) || isValidEscape(j, k));
     if (isNameCodePoint(i))
@@ -50,7 +50,7 @@ bool CssTokenizer::willStartIdentifier(int i, int j, int k) {
     return isValidEscape(i, j);
 }
 
-int CssTokenizer::getHexDigit(int ch) {
+int Tokenizer::getHexDigit(int ch) {
     if (ch >= '0' && ch <= '9')
         return ch - '0';
     if (ch >= 'a' && ch <= 'f')
@@ -60,16 +60,16 @@ int CssTokenizer::getHexDigit(int ch) {
     return -1;
 }
 
-int CssTokenizer::consumeHexDigit() {
+int Tokenizer::consumeHexDigit() {
     return getHexDigit(consume());
 }
 
-void CssTokenizer::consumeWhitespace() {
+void Tokenizer::consumeWhitespace() {
     while (isWhitespace(peek(0)))
         consume();
 }
 
-void CssTokenizer::consumeComment() {
+void Tokenizer::consumeComment() {
     int c;
     while (!isEOF(c = consume())) {
         if (c == '*' && peek(0) == '/') {
@@ -79,7 +79,7 @@ void CssTokenizer::consumeComment() {
     }
 }
 
-std::string CssTokenizer::consumeName() {
+std::string Tokenizer::consumeName() {
     std::string str;
     int c;
     while (true) {
@@ -94,7 +94,7 @@ std::string CssTokenizer::consumeName() {
     return str;
 }
 
-int CssTokenizer::consumeEscapedCodePoint() {
+int Tokenizer::consumeEscapedCodePoint() {
     int c = consume();
     if (isHexDigit(c)) {
         int num = getHexDigit(c);
@@ -113,8 +113,8 @@ int CssTokenizer::consumeEscapedCodePoint() {
     }
 }
 
-CssNumberToken CssTokenizer::consumeNumber() {
-    CssNumberToken ret;
+NumberToken Tokenizer::consumeNumber() {
+    NumberToken ret;
     bool neg = false;
     int c = consume();
     ret.integer = 0;
@@ -153,8 +153,8 @@ CssNumberToken CssTokenizer::consumeNumber() {
     return ret;
 }
 
-CssToken CssTokenizer::consumeStringToken(int endChar) {
-    CssToken ret (CssTokenType::STRING);
+Token Tokenizer::consumeStringToken(int endChar) {
+    Token ret (TokenType::STRING);
 
     std::string str;
     int c;
@@ -163,7 +163,7 @@ CssToken CssTokenizer::consumeStringToken(int endChar) {
         if (isEOF(c))
             break;
         if (c == '\n') {
-            ret.type = CssTokenType::BAD_STRING;
+            ret.type = TokenType::BAD_STRING;
             reconsume(c);
             break;
         }
@@ -187,68 +187,68 @@ CssToken CssTokenizer::consumeStringToken(int endChar) {
     return ret;
 }
 
-CssToken CssTokenizer::consumeHashToken() {
+Token Tokenizer::consumeHashToken() {
     if (isNameCodePoint(peek(0)) || isValidEscape(peek(0), peek(1))) {
-        CssToken ret (CssTokenType::HASH);
+        Token ret (TokenType::HASH);
         ret.hash.isId = willStartIdentifier();
         ret.hash.name = consumeName();
         return ret;
     }
-    return CssToken(CssTokenType::INVALID);
+    return Token(TokenType::INVALID);
 }
 
-CssToken CssTokenizer::consumeNumericToken() {
-    CssNumberToken num = consumeNumber();
+Token Tokenizer::consumeNumericToken() {
+    NumberToken num = consumeNumber();
     if (willStartIdentifier()) {
-        CssToken ret (CssTokenType::DIMENSION);
+        Token ret (TokenType::DIMENSION);
         ret.dimension.number = num;
         ret.dimension.unit = consumeName();
         return ret;
     } else {
-        CssToken ret (CssTokenType::NUMBER);
+        Token ret (TokenType::NUMBER);
         ret.number = num;
         if (peek(0) == '%') {
             consume();
-            ret.type = CssTokenType::PERCENTAGE;
+            ret.type = TokenType::PERCENTAGE;
         }
         return ret;
     }
 }
 
-CssToken CssTokenizer::consumeIdentLikeToken() {
+Token Tokenizer::consumeIdentLikeToken() {
     std::string name = consumeName();
     if (peek(0) == '(') {
         if (StrUtil::equalsIgnoreCase(name, "url"))
             return consumeUrlToken();
 
-        CssToken ret (CssTokenType::FUNCTION);
+        Token ret (TokenType::FUNCTION);
         ret.string.value = name;
         return ret;
     }
-    CssToken ret (CssTokenType::IDENT);
+    Token ret (TokenType::IDENT);
     ret.string.value = name;
     return ret;
 }
 
-CssToken CssTokenizer::consumeUrlToken() {
+Token Tokenizer::consumeUrlToken() {
     consumeWhitespace();
     if (isEOF(peek(0)))
-        return CssToken(CssTokenType::URL);
+        return Token(TokenType::URL);
     if (peek(0) == '\'' || peek(0) == '"') {
-        CssToken token = consumeStringToken();
-        if (token.type != CssTokenType::BAD_STRING) {
-            token.type = CssTokenType::URL;
+        Token token = consumeStringToken();
+        if (token.type != TokenType::BAD_STRING) {
+            token.type = TokenType::URL;
             consumeWhitespace();
             if (peek(0) == ')' || isEOF(peek(0))) {
                 consume();
                 return token;
             }
         }
-        token.type = CssTokenType::BAD_URL;
+        token.type = TokenType::BAD_URL;
         consumeBadUrlRemnants();
         return token;
     } else {
-        CssToken token (CssTokenType::URL);
+        Token token (TokenType::URL);
         std::string str;
         int c;
         while (!isEOF(c = getchar())) {
@@ -258,13 +258,13 @@ CssToken CssTokenizer::consumeUrlToken() {
                     consume();
                 } else {
                     consumeBadUrlRemnants();
-                    token.type = CssTokenType::BAD_URL;
+                    token.type = TokenType::BAD_URL;
                 }
                 break;
             }
             if (c == '"' || c == '\'' || c == '(' || isNonPrintable(c)) {
                 consumeBadUrlRemnants();
-                token.type = CssTokenType::BAD_URL;
+                token.type = TokenType::BAD_URL;
                 break;
             }
             if (c == '\\') {
@@ -273,7 +273,7 @@ CssToken CssTokenizer::consumeUrlToken() {
                     continue;
                 }
                 consumeBadUrlRemnants();
-                token.type = CssTokenType::BAD_URL;
+                token.type = TokenType::BAD_URL;
                 break;
             }
             StrUtil::appendUTF8Char(str, c);
@@ -283,7 +283,7 @@ CssToken CssTokenizer::consumeUrlToken() {
     }
 }
 
-void CssTokenizer::consumeBadUrlRemnants() {
+void Tokenizer::consumeBadUrlRemnants() {
     int c;
     while (!isEOF(c = getchar())) {
         if (isValidEscape(c, peek(0)))
@@ -291,8 +291,8 @@ void CssTokenizer::consumeBadUrlRemnants() {
     }
 }
 
-CssToken CssTokenizer::consumeUnicodeRangeToken() {
-    CssToken ret (CssTokenType::UNICODE_RANGE);
+Token Tokenizer::consumeUnicodeRangeToken() {
+    Token ret (TokenType::UNICODE_RANGE);
     int num = 0;
     int q = 1;
     int i = 0;
@@ -317,13 +317,13 @@ CssToken CssTokenizer::consumeUnicodeRangeToken() {
     return ret;
 }
 
-CssToken CssTokenizer::next() {
+Token Tokenizer::next() {
     int c = consume();
     if (isEOF(c))
-        return CssToken(CssTokenType::END_OF_FILE);
+        return Token(TokenType::END_OF_FILE);
     if (isWhitespace(c)) { // whitespace
         consumeWhitespace();
-        return CssToken(CssTokenType::WHITESPACE);
+        return Token(TokenType::WHITESPACE);
     }
     if (isDigit(c)) {
         reconsume(c);
@@ -338,7 +338,7 @@ CssToken CssTokenizer::next() {
         case '\'':
             return consumeStringToken(c);
         case '#': {
-            CssToken token = consumeHashToken();
+            Token token = consumeHashToken();
             if (token)
                 return token;
             break;
@@ -346,17 +346,17 @@ CssToken CssTokenizer::next() {
         case '$':
             if (peek(0) == '=') {
                 consume();
-                return CssToken(CssTokenType::SUFFIX_MATCH);
+                return Token(TokenType::SUFFIX_MATCH);
             }
             break;
         case '(':
-            return CssToken(CssTokenType::BRACKET_OPEN);
+            return Token(TokenType::BRACKET_OPEN);
         case ')':
-            return CssToken(CssTokenType::BRACKET_CLOSE);
+            return Token(TokenType::BRACKET_CLOSE);
         case '*':
             if (peek(0) == '*') {
                 consume();
-                return CssToken(CssTokenType::SUBSTRING_MATCH);
+                return Token(TokenType::SUBSTRING_MATCH);
             }
             break;
         case '+':
@@ -367,7 +367,7 @@ CssToken CssTokenizer::next() {
             }
             break;
         case ',':
-            return CssToken(CssTokenType::COMMA);
+            return Token(TokenType::COMMA);
         case '-':
             if (willStartNumber()) {
                 reconsume(c);
@@ -379,7 +379,7 @@ CssToken CssTokenizer::next() {
             }
             if (peek(0) == '-' && peek(1) == '>') {
                 consume(2);
-                return CssToken(CssTokenType::CDC);
+                return Token(TokenType::CDC);
             }
             break;
         case '/':
@@ -390,24 +390,24 @@ CssToken CssTokenizer::next() {
             }
             break;
         case ':':
-            return CssToken(CssTokenType::COLON);
+            return Token(TokenType::COLON);
         case ';':
-            return CssToken(CssTokenType::SEMICOLON);
+            return Token(TokenType::SEMICOLON);
         case '<':
             if (peek(0) == '!' && peek(1) == '-' && peek(2) == '-') {
                 consume(3);
-                return CssToken(CssTokenType::CDO);
+                return Token(TokenType::CDO);
             }
             break;
         case '@':
             if (willStartIdentifier()) {
-                CssToken token (CssTokenType::AT_KEYWORD);
+                Token token (TokenType::AT_KEYWORD);
                 token.string.value = consumeName();
                 return token;
             }
             break;
         case '[':
-            return CssToken(CssTokenType::SQUARE_BRACKET_OPEN);
+            return Token(TokenType::SQUARE_BRACKET_OPEN);
         case '\\':
             if (isValidEscape(c, peek(0))) {
                 reconsume(c);
@@ -415,17 +415,17 @@ CssToken CssTokenizer::next() {
             }
             break;
         case ']':
-            return CssToken(CssTokenType::SQUARE_BRACKET_CLOSE);
+            return Token(TokenType::SQUARE_BRACKET_CLOSE);
         case '^':
             if (peek(0) == '=') {
                 consume();
-                return CssToken(CssTokenType::PREFIX_MATCH);
+                return Token(TokenType::PREFIX_MATCH);
             }
             break;
         case '{':
-            return CssToken(CssTokenType::CURELY_BRACKET_OPEN);
+            return Token(TokenType::CURELY_BRACKET_OPEN);
         case '}':
-            return CssToken(CssTokenType::CURELY_BRACKET_CLOSE);
+            return Token(TokenType::CURELY_BRACKET_CLOSE);
         case 'U':
         case 'u':
             if (peek(0) == '+' && (isHexDigit(peek(1)) || peek(1) == 0x3F)) {
@@ -437,23 +437,23 @@ CssToken CssTokenizer::next() {
         case '|':
             if (peek(0) == '=') {
                 consume();
-                return CssToken(CssTokenType::DASH_MATCH);
+                return Token(TokenType::DASH_MATCH);
             } else if (peek(0) == '|') {
                 consume();
-                return CssToken(CssTokenType::COLUMN);
+                return Token(TokenType::COLUMN);
             }
             break;
         case '~':
             if (peek(0) == '=') {
                 consume();
-                return CssToken(CssTokenType::INCLUDE_MATCH);
+                return Token(TokenType::INCLUDE_MATCH);
             }
             break;
         default:
             break;
     }
     {
-        CssToken token (CssTokenType::DELIM);
+        Token token (TokenType::DELIM);
         token.delim.codePoint = c;
         return token;
     }

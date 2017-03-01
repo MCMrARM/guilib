@@ -5,73 +5,73 @@
 namespace guilib {
 namespace css {
 
-class CssTokenizer;
+class Tokenizer;
 
-enum CssTokenType {
+enum TokenType {
     INVALID, IDENT, FUNCTION, AT_KEYWORD, HASH, STRING, BAD_STRING, URL, BAD_URL, DELIM, NUMBER, PERCENTAGE, DIMENSION,
     UNICODE_RANGE, INCLUDE_MATCH, DASH_MATCH, PREFIX_MATCH, SUFFIX_MATCH, SUBSTRING_MATCH, COLUMN, WHITESPACE, CDO, CDC,
     COLON, SEMICOLON, COMMA, SQUARE_BRACKET_OPEN, SQUARE_BRACKET_CLOSE, BRACKET_OPEN, BRACKET_CLOSE,
     CURELY_BRACKET_OPEN, CURELY_BRACKET_CLOSE, END_OF_FILE
 };
 
-struct CssHashToken {
+struct HashToken {
     bool isId;
     std::string name;
 };
-struct CssStringToken {
+struct StringToken {
     std::string value;
 };
-struct CssNumberToken {
+struct NumberToken {
     int integer;
     double number;
     bool useFloat = false;
 };
-struct CssDimensionToken {
-    CssNumberToken number;
+struct DimensionToken {
+    NumberToken number;
     std::string unit;
 };
-struct CssDelimToken {
+struct DelimToken {
     int codePoint;
 };
-struct CssUnicodeRangeToken {
+struct UnicodeRangeToken {
     int start, end;
 };
 
-class CssToken {
+class Token {
 
 private:
 
-    friend class CssTokenizer;
+    friend class Tokenizer;
 
-    CssTokenType type;
-    CssHashToken hash;
-    CssStringToken string;
-    CssNumberToken number;
-    CssDimensionToken dimension;
-    CssDelimToken delim;
-    CssUnicodeRangeToken unicodeRange;
+    TokenType type;
+    HashToken hash;
+    StringToken string;
+    NumberToken number;
+    DimensionToken dimension;
+    DelimToken delim;
+    UnicodeRangeToken unicodeRange;
 
 public:
 
-    CssToken(CssTokenType type) : type(type) { }
+    Token(TokenType type) : type(type) { }
 
-    operator bool() { return type != CssTokenType::INVALID; }
+    operator bool() { return type != TokenType::INVALID; }
 
-    CssHashToken const& asHash() const { return hash; }
-    CssStringToken const& asString() const { return string; }
-    CssNumberToken const& asNumber() const { return number; }
-    CssNumberToken const& asPercentage() const { return number; }
-    CssDimensionToken const& asDimension() const { return dimension; }
-    CssStringToken const& asIdentifier() const { return string; }
-    CssStringToken const& asFunction() const { return string; }
-    CssStringToken const& asUrl() const { return string; }
-    CssDelimToken const& asDelim() const { return delim; }
-    CssUnicodeRangeToken const& asUnicodeRange() const { return unicodeRange; }
+    HashToken const& asHash() const { return hash; }
+    StringToken const& asString() const { return string; }
+    NumberToken const& asNumber() const { return number; }
+    NumberToken const& asPercentage() const { return number; }
+    DimensionToken const& asDimension() const { return dimension; }
+    StringToken const& asIdentifier() const { return string; }
+    StringToken const& asFunction() const { return string; }
+    StringToken const& asUrl() const { return string; }
+    DelimToken const& asDelim() const { return delim; }
+    UnicodeRangeToken const& asUnicodeRange() const { return unicodeRange; }
 
 
 };
 
-class CssTokenizer {
+class Tokenizer {
 
 private:
 
@@ -103,24 +103,24 @@ private:
     int consumeHexDigit();
     std::string consumeName();
     int consumeEscapedCodePoint();
-    CssNumberToken consumeNumber();
+    NumberToken consumeNumber();
     void consumeWhitespace();
     void consumeComment();
 
-    CssToken consumeStringToken(int endChar);
-    CssToken consumeStringToken() { return consumeStringToken(consume()); }
-    CssToken consumeHashToken();
-    CssToken consumeNumericToken();
-    CssToken consumeIdentLikeToken();
-    CssToken consumeUrlToken();
+    Token consumeStringToken(int endChar);
+    Token consumeStringToken() { return consumeStringToken(consume()); }
+    Token consumeHashToken();
+    Token consumeNumericToken();
+    Token consumeIdentLikeToken();
+    Token consumeUrlToken();
     void consumeBadUrlRemnants();
-    CssToken consumeUnicodeRangeToken();
+    Token consumeUnicodeRangeToken();
 
 public:
 
-    CssTokenizer(std::istream& stream);
+    Tokenizer(std::istream& stream);
 
-    CssToken next();
+    Token next();
 
 };
 
