@@ -170,32 +170,32 @@ int Tokenizer::consumeEscapedCodePoint() {
 NumberToken Tokenizer::consumeNumber() {
     NumberToken ret;
     bool neg = false;
-    int c = consume();
+    int c = peek(0);
     ret.integer = 0;
     if (c == '+' || c == '-') {
         neg = (c == '-');
-        c = consume();
+        consume();
     }
-    while (isDigit(c)) {
-        ret.integer = ret.integer * 10 + c;
+    while (isDigit(peek(0))) {
         c = consume();
+        ret.integer = ret.integer * 10 + (c - '0');
     }
     ret.number = ret.integer;
     if (peek(0) == '.' && isDigit(peek(1))) {
         ret.useFloat = true;
         double frac = 0;
-        while (isDigit(c)) {
-            frac = frac / 10.0 + c / 10.0;
+        while (isDigit(peek(0))) {
             c = consume();
+            frac = frac / 10.0 + (c - '0') / 10.0;
         }
         ret.number += frac;
     }
     if ((peek(0) == 'E' || peek(0) == 'e') && isDigit(peek(1))) {
         ret.useFloat = true;
         int e = 0;
-        while (isDigit(c)) {
-            e = e * 10 + c;
+        while (isDigit(peek(0))) {
             c = consume();
+            e = e * 10 + (c - '0');
         }
         ret.number *= std::pow(10.0, e);
         ret.integer = (int) ret.number;
