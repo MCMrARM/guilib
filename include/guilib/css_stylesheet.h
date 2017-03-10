@@ -1,6 +1,8 @@
 #pragma once
 
 #include <istream>
+#include <vector>
+#include <memory>
 
 namespace guilib {
 namespace css {

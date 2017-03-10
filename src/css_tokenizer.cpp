@@ -6,6 +6,8 @@
 
 using namespace guilib::css;
 
+Token Token::INVALID (TokenType::INVALID);
+
 std::string guilib::css::TokenTypeToString(TokenType type) {
     switch (type) {
         case IDENT: return "IDENT";
@@ -29,7 +31,7 @@ std::string guilib::css::TokenTypeToString(TokenType type) {
         case COLUMN: return "COLUMN";
         case WHITESPACE: return "WHITESPACE";
         case CDO: return "CDO";
-        case CDC: return "CDC,";
+        case CDC: return "CDC";
         case COLON: return "COLON";
         case SEMICOLON: return "SEMICOLON";
         case COMMA: return "COMMA";
@@ -37,8 +39,8 @@ std::string guilib::css::TokenTypeToString(TokenType type) {
         case SQUARE_BRACKET_CLOSE: return "SQUARE_BRACKET_CLOSE";
         case BRACKET_OPEN: return "BRACKET_OPEN";
         case BRACKET_CLOSE: return "BRACKET_CLOSE";
-        case CURELY_BRACKET_OPEN: return "CURELY_BRACKET_OPEN";
-        case CURELY_BRACKET_CLOSE: return "CURELY_BRACKET_CLOSE";
+        case CURLY_BRACKET_OPEN: return "CURLY_BRACKET_OPEN";
+        case CURLY_BRACKET_CLOSE: return "CURLY_BRACKET_CLOSE";
         case END_OF_FILE: return "END_OF_FILE";
         default: return "INVALID";
     }
@@ -48,8 +50,8 @@ std::string Token::toDebugString() const {
     std::stringstream ss;
     ss << TokenTypeToString(type);
     if (isHash())
-        ss << " name: " << asHash().name << ", isIt: " << asHash().isId;
-    if (isString() || isIdentifier() || isFunction() || isUrl())
+        ss << " name: " << asHash().name << ", isId: " << asHash().isId;
+    if (isString() || isIdent() || isFunction() || isUrl())
         ss << " value: " << asString().value;
     if (isNumber() || isPercentage())
         ss << " value: " << asNumber().number;
@@ -482,9 +484,9 @@ Token Tokenizer::next() {
             }
             break;
         case '{':
-            return Token(TokenType::CURELY_BRACKET_OPEN);
+            return Token(TokenType::CURLY_BRACKET_OPEN);
         case '}':
-            return Token(TokenType::CURELY_BRACKET_CLOSE);
+            return Token(TokenType::CURLY_BRACKET_CLOSE);
         case 'U':
         case 'u':
             if (peek(0) == '+' && (isHexDigit(peek(1)) || peek(1) == 0x3F)) {
