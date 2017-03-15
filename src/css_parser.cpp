@@ -4,18 +4,51 @@
 
 using namespace guilib::css;
 
-TokenReader::TokenReader(Tokenizer& tokenizer) : tokenizer(tokenizer) {
+ComponentValue ComponentValue::INVALID (TokenType::INVALID);
+
+std::string ComponentValue::toString() const {
+    if (isFunction()) {
+        return asFunction().name + "(" + asFunction().value.toString() + ")";
+    }
+    return Token::toString();
+}
+
+ComponentValue const& ComponentList::operator[](ssize_t index) const {
+    if (index < 0)
+        index = storage.size() + index;
+    if (index >= storage.size())
+        return ComponentValue::INVALID;
+    return storage.at((size_t) index);
+}
+
+std::string ComponentList::toString() const {
+    std::string s;
+    for (auto const& it : *this)
+        s.append(it.toString());
+    return s;
+}
+
+ComponentReader::ComponentReader(Tokenizer& tokenizer) : tokenizer(tokenizer) {
     //
 }
 
-Token TokenReader::next() {
+FunctionComponent ComponentReader::parseFunction(std::string const& name) {
+    FunctionComponent fcn;
+    fcn.name = name;
+    ComponentValue val (TokenType::INVALID);
+    while (!(val = next()).isEOF() && val.getType() != TokenType::BRACKET_CLOSE)
+        fcn.value.append(std::move(val));
+    return fcn;
+}
+
+ComponentValue ComponentReader::next() {
     if (currentBlockScopeEof)
         return Token(TokenType::END_OF_FILE);
-    Token ret = tokenizer.next();
+    ComponentValue ret = tokenizer.next();
     if (ret.getType() == TokenType::CURLY_BRACKET_CLOSE && currentBlockScope > 0) {
         if (blocksWereProperlyOpened.top()) {
             currentBlockScopeEof = true;
-            return Token(TokenType::END_OF_FILE);
+            return ComponentValue(TokenType::END_OF_FILE);
         } else if (currentBlockScope > 0) {
             currentBlockScope--;
             blocksWereProperlyOpened.pop();
@@ -25,14 +58,16 @@ Token TokenReader::next() {
         currentBlockScope++;
         blocksWereProperlyOpened.push(false);
     }
+    if (ret.getType() == TokenType::FUNCTION)
+        ret.function = parseFunction(ret.asString().value);
     return ret;
 }
 
-void TokenReader::enterBasicBlock() {
+void ComponentReader::enterBasicBlock() {
     blocksWereProperlyOpened.top() = true;
 }
 
-void TokenReader::exitBasicBlock() {
+void ComponentReader::exitBasicBlock() {
     if (!currentBlockScopeEof || currentBlockScope <= 0)
         throw std::logic_error("Invalid basic block exit");
     currentBlockScopeEof = false;
@@ -57,9 +92,8 @@ void RuleListParser<OutputParam>::addAtRuleHandler(RuleCondFunc cond, RuleHandle
 }
 
 template <typename OutputParam>
-void RuleListParser<OutputParam>::parseRule(std::vector<RuleHandleDef> const& handlers, TokenReader& source, OutputParam& output,
-                                            TokenList const& key) {
-    printf("Parse rule %s\n", key[0].toDebugString().c_str());
+void RuleListParser<OutputParam>::parseRule(std::vector<RuleHandleDef> const& handlers, ComponentReader& source, OutputParam& output,
+                                            ComponentList const& key) {
     source.enterBasicBlock();
     for (RuleHandleDef const& def : handlers) {
         if (def.cond(key)) {
@@ -73,7 +107,7 @@ void RuleListParser<OutputParam>::parseRule(std::vector<RuleHandleDef> const& ha
 }
 
 template <typename OutputParam>
-void RuleListParser<OutputParam>::parseRule(TokenReader& source, OutputParam& output, TokenList const& key) {
+void RuleListParser<OutputParam>::parseRule(ComponentReader& source, OutputParam& output, ComponentList const& key) {
     std::vector<RuleHandleDef>* handlers = &qualifiedRules;
     if (key[0].getType() == TokenType::AT_KEYWORD)
         handlers = &atRules;
@@ -81,22 +115,22 @@ void RuleListParser<OutputParam>::parseRule(TokenReader& source, OutputParam& ou
 }
 
 template <typename OutputParam>
-void RuleListParser<OutputParam>::parse(TokenReader& source, OutputParam& output, bool topLevel) {
-    TokenList keyTokens;
-    Token token (TokenType::INVALID);
-    while (!(token = source.next()).isEOF()) {
-        if (token.getType() == TokenType::WHITESPACE && keyTokens.size() == 0)
+void RuleListParser<OutputParam>::parse(ComponentReader& source, OutputParam& output, bool topLevel) {
+    ComponentList keyComponents;
+    ComponentValue component (TokenType::INVALID);
+    while (!(component = source.next()).isEOF()) {
+        if (component.getType() == TokenType::WHITESPACE && keyComponents.size() == 0)
             continue;
-        if (token.getType() == TokenType::CDO || token.getType() == TokenType::CDC) {
+        if (component.getType() == TokenType::CDO || component.getType() == TokenType::CDC) {
             if (topLevel)
                 continue;
         }
-        if (token.getType() == TokenType::CURLY_BRACKET_OPEN) {
-            parseRule(source, output, keyTokens);
-            keyTokens.clear();
+        if (component.getType() == TokenType::CURLY_BRACKET_OPEN) {
+            parseRule(source, output, keyComponents);
+            keyComponents.clear();
             continue;
         }
-        keyTokens.append(std::move(token));
+        keyComponents.append(std::move(component));
     }
 }
 
@@ -118,8 +152,7 @@ void DeclarationListParser<OutputParam>::addDeclaration(DeclarationCondFunc cond
 }
 
 template <typename OutputParam>
-bool DeclarationListParser<OutputParam>::parseDeclaration(std::string const& key, TokenList& value, OutputParam& output) {
-    printf("Parse declaration: %s\n", key.c_str());
+bool DeclarationListParser<OutputParam>::parseDeclaration(std::string const& key, ComponentList& value, OutputParam& output) {
     bool important = false;
     if (value[-2].isDelim('!') && value[-1].isIdent("important")) {
         value.pop();
@@ -136,55 +169,55 @@ bool DeclarationListParser<OutputParam>::parseDeclaration(std::string const& key
 }
 
 template <typename OutputParam>
-void DeclarationListParser<OutputParam>::parse(TokenReader& source, OutputParam& output) {
-    Token token (TokenType::INVALID);
-    while (!(token = source.next()).isEOF()) {
-        if (token.getType() == TokenType::WHITESPACE || token.getType() == TokenType::SEMICOLON)
+void DeclarationListParser<OutputParam>::parse(ComponentReader& source, OutputParam& output) {
+    ComponentValue component (TokenType::INVALID);
+    while (!(component = source.next()).isEOF()) {
+        if (component.getType() == TokenType::WHITESPACE || component.getType() == TokenType::SEMICOLON)
             continue;
-        if (token.getType() == TokenType::AT_KEYWORD) {
-            TokenList keyTokens;
-            keyTokens.append(std::move(token));
-            while (!(token = source.next()).isEOF()) {
-                if (token.getType() == TokenType::CURLY_BRACKET_OPEN) {
-                    RuleListParser<OutputParam>::parseRule(atRules, source, output, keyTokens);
+        if (component.getType() == TokenType::AT_KEYWORD) {
+            ComponentList keyComponents;
+            keyComponents.append(std::move(component));
+            while (!(component = source.next()).isEOF()) {
+                if (component.getType() == TokenType::CURLY_BRACKET_OPEN) {
+                    RuleListParser<OutputParam>::parseRule(atRules, source, output, keyComponents);
                     break;
                 }
-                keyTokens.append(std::move(token));
+                keyComponents.append(std::move(component));
             }
             continue;
         }
-        if (token.getType() == TokenType::IDENT) {
+        if (component.getType() == TokenType::IDENT) {
             // consume a declaration
-            std::string key = token.asIdent().value;
-            token = source.next();
-            if (token.getType() == TokenType::WHITESPACE)
-                token = source.next();
-            if (token.getType() != TokenType::COLON) // parse error
+            std::string key = component.asIdent().value;
+            component = source.next();
+            if (component.getType() == TokenType::WHITESPACE)
+                component = source.next();
+            if (component.getType() != TokenType::COLON) // parse error
                 continue;
-            TokenList tokens;
-            if ((token = source.next()).getType() != TokenType::WHITESPACE)
-                tokens.append(std::move(token)); // trim first token
-            while (!(token = source.next()).isEOF() && token.getType() != TokenType::SEMICOLON)
-                tokens.append(std::move(token));
-            if (tokens.size() > 0 && token.getType() == TokenType::WHITESPACE)
-                tokens.pop(); // trim last token
-            parseDeclaration(key, tokens, output);
+            ComponentList components;
+            if ((component = source.next()).getType() != TokenType::WHITESPACE)
+                components.append(std::move(component)); // trim first token
+            while (!(component = source.next()).isEOF() && component.getType() != TokenType::SEMICOLON)
+                components.append(std::move(component));
+            if (components.size() > 0 && component.getType() == TokenType::WHITESPACE)
+                components.pop(); // trim last token
+            parseDeclaration(key, components, output);
             continue;
         }
         // parse error
-        while (!(token = source.next()).isEOF()) {
-            if (token.getType() == TokenType::SEMICOLON)
+        while (!(component = source.next()).isEOF()) {
+            if (component.getType() == TokenType::SEMICOLON)
                 break;
         }
     }
 }
 
 void Parser::parse(Tokenizer& tokenizer) {
-    TokenReader reader (tokenizer);
+    ComponentReader reader (tokenizer);
     RuleListParser<void*> test;
     DeclarationListParser<void*> test2;
-    test.addQualifiedRuleHandler([](TokenList const&) { return true; }, [&test2](TokenList const& key, TokenReader& source, void*& output) {
-        printf("Parse qualified rule\n");
+    test.addQualifiedRuleHandler([](ComponentList const&) { return true; }, [&test2](ComponentList const& key, ComponentReader& source, void*& output) {
+        //printf("Parse qualified rule\n");
         test2.parse(source, output);
     });
     void* np;

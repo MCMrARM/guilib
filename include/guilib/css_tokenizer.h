@@ -27,6 +27,8 @@ struct NumberToken {
     int integer;
     double number;
     bool useFloat = false;
+
+    std::string toString() const;
 };
 struct DimensionToken {
     NumberToken number;
@@ -90,38 +92,10 @@ public:
     DelimToken const& asDelim() const { return delim; }
     UnicodeRangeToken const& asUnicodeRange() const { return unicodeRange; }
 
+    std::string toString() const;
     std::string toDebugString() const;
 
     static Token INVALID;
-
-};
-
-class TokenList {
-
-private:
-
-    std::vector<Token> storage;
-
-public:
-
-    TokenList() { }
-
-    void append(Token&& token) { storage.push_back(std::move(token)); }
-    void pop() { storage.pop_back(); }
-    void clear() { storage.clear(); }
-
-    size_t size() const { return storage.size(); }
-
-    Token const& operator[](ssize_t index) const {
-        if (index < 0)
-            index = storage.size() + index;
-        if (index >= storage.size())
-            return Token::INVALID;
-        return storage.at((size_t) index);
-    }
-
-    inline std::vector<Token>::const_iterator begin() const { return storage.begin(); }
-    inline std::vector<Token>::const_iterator end() const { return storage.end(); }
 
 };
 

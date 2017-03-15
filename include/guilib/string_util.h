@@ -48,6 +48,20 @@ public:
     };
 
     /**
+     * Converts the specified number to a string.
+     * @param i the number to convert
+     * @return a string which represents the specified number
+     */
+    static std::string toString(int i) { return std::to_string(i); }
+
+    /**
+     * Converts the specified number to a string.
+     * @param i the number to convert
+     * @return a string which represents the specified number
+     */
+    static std::string toString(double i) { return std::to_string(i); }
+
+    /**
      * Returns a wrapper object that provides function that can be used to iterate over the string using the UTF8
      * encoding.
      * @param str the string to iterate over

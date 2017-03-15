@@ -46,6 +46,12 @@ std::string guilib::css::TokenTypeToString(TokenType type) {
     }
 }
 
+std::string NumberToken::toString() const {
+    if (useFloat)
+        return StrUtil::toString(number);
+    return StrUtil::toString(integer);
+}
+
 std::string Token::toDebugString() const {
     std::stringstream ss;
     ss << TokenTypeToString(type);
@@ -63,6 +69,51 @@ std::string Token::toDebugString() const {
         ss << " start: " << asUnicodeRange().start << ", end: " << asUnicodeRange().end;
 
     return ss.str();
+}
+
+std::string Token::toString() const {
+    if (isHash())
+        return asHash().name;
+    if (isString() || isIdent() || type == TokenType::AT_KEYWORD)
+        return asString().value;
+    if (isFunction())
+        return asFunction().value + "(";
+    if (isUrl())
+        return "url(" + asUrl().value + ")";
+    if (isNumber())
+        return asNumber().toString();
+    if (isPercentage())
+        return asNumber().toString() + "%";
+    if (isDimension())
+        return asDimension().number.toString() + asDimension().unit;
+    if (isDelim()) {
+        std::string str;
+        StrUtil::appendUTF8Char(str, asDelim().codePoint);
+        return str;
+    }
+    if (isUnicodeRange())
+        return "u+" + StrUtil::toString(asUnicodeRange().start) + "-" + StrUtil::toString(asUnicodeRange().end);
+    switch (type) {
+        case WHITESPACE: return " ";
+        case INCLUDE_MATCH: return "~=";
+        case DASH_MATCH: return "|=";
+        case PREFIX_MATCH: return "^=";
+        case SUFFIX_MATCH: return "$=";
+        case SUBSTRING_MATCH: return "*=";
+        case COLUMN: return "||";
+        case CDO: return "<!--";
+        case CDC: return "-->";
+        case COLON: return ":";
+        case SEMICOLON: return ";";
+        case COMMA: return ",";
+        case SQUARE_BRACKET_OPEN: return "[";
+        case SQUARE_BRACKET_CLOSE: return "]";
+        case BRACKET_OPEN: return "(";
+        case BRACKET_CLOSE: return ")";
+        case CURLY_BRACKET_OPEN: return "{";
+        case CURLY_BRACKET_CLOSE: return "}";
+        default: return "[Unknown]";
+    }
 }
 
 Tokenizer::Tokenizer(std::istream& stream) : stream(stream) {
@@ -190,6 +241,7 @@ NumberToken Tokenizer::consumeNumber() {
     ret.number = ret.integer;
     if (peek(0) == '.' && isDigit(peek(1))) {
         ret.useFloat = true;
+        consume();
         double frac = 0;
         while (isDigit(peek(0))) {
             c = consume();
@@ -279,6 +331,8 @@ Token Tokenizer::consumeNumericToken() {
 Token Tokenizer::consumeIdentLikeToken() {
     std::string name = consumeName();
     if (peek(0) == '(') {
+        consume();
+
         if (StrUtil::equalsIgnoreCase(name, "url"))
             return consumeUrlToken();
 
