@@ -57,18 +57,27 @@ void RuleListParser<OutputParam>::addAtRuleHandler(RuleCondFunc cond, RuleHandle
 }
 
 template <typename OutputParam>
-bool RuleListParser<OutputParam>::parseRule(TokenReader& source, OutputParam& output, TokenList const& key) {
+void RuleListParser<OutputParam>::parseRule(std::vector<RuleHandleDef> const& handlers, TokenReader& source, OutputParam& output,
+                                            TokenList const& key) {
     printf("Parse rule %s\n", key[0].toDebugString().c_str());
+    source.enterBasicBlock();
+    for (RuleHandleDef const& def : handlers) {
+        if (def.cond(key)) {
+            def.handle(key, source, output);
+            source.exitBasicBlock();
+            return;
+        }
+    }
+    while (!source.next().isEOF());
+    source.exitBasicBlock();
+}
+
+template <typename OutputParam>
+void RuleListParser<OutputParam>::parseRule(TokenReader& source, OutputParam& output, TokenList const& key) {
     std::vector<RuleHandleDef>* handlers = &qualifiedRules;
     if (key[0].getType() == TokenType::AT_KEYWORD)
         handlers = &atRules;
-    for (RuleHandleDef& def : *handlers) {
-        if (def.cond(key)) {
-            def.handle(key, source, output);
-            return true;
-        }
-    }
-    return false;
+    parseRule(*handlers, source, output, key);
 }
 
 template <typename OutputParam>
@@ -83,16 +92,29 @@ void RuleListParser<OutputParam>::parse(TokenReader& source, OutputParam& output
                 continue;
         }
         if (token.getType() == TokenType::CURLY_BRACKET_OPEN) {
-            source.enterBasicBlock();
-            if (!parseRule(source, output, keyTokens)) { // failed to parse rule
-                while (!(token = source.next()).isEOF()); // eat the tokens
-            }
-            source.exitBasicBlock();
+            parseRule(source, output, keyTokens);
             keyTokens.clear();
             continue;
         }
         keyTokens.append(std::move(token));
     }
+}
+
+template <typename OutputParam>
+void DeclarationListParser<OutputParam>::clear() {
+    atRules.clear();
+    declarations.clear();
+}
+
+template <typename OutputParam>
+void DeclarationListParser<OutputParam>::addAtRuleHandler(typename RuleListParser<OutputParam>::RuleCondFunc cond,
+                                                          typename RuleListParser<OutputParam>::RuleHandleFunc handle) {
+    atRules.push_back({cond, handle});
+}
+
+template <typename OutputParam>
+void DeclarationListParser<OutputParam>::addDeclaration(DeclarationCondFunc cond, DeclarationHandleFunc handle) {
+    declarations.push_back({cond, handle});
 }
 
 template <typename OutputParam>
@@ -120,7 +142,15 @@ void DeclarationListParser<OutputParam>::parse(TokenReader& source, OutputParam&
         if (token.getType() == TokenType::WHITESPACE || token.getType() == TokenType::SEMICOLON)
             continue;
         if (token.getType() == TokenType::AT_KEYWORD) {
-            // TODO: At rules (I'd like to reuse some code here)
+            TokenList keyTokens;
+            keyTokens.append(std::move(token));
+            while (!(token = source.next()).isEOF()) {
+                if (token.getType() == TokenType::CURLY_BRACKET_OPEN) {
+                    RuleListParser<OutputParam>::parseRule(atRules, source, output, keyTokens);
+                    break;
+                }
+                keyTokens.append(std::move(token));
+            }
             continue;
         }
         if (token.getType() == TokenType::IDENT) {

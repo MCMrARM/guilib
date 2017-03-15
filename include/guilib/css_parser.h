@@ -44,10 +44,13 @@ public:
         RuleHandleFunc handle;
     };
 
+    static void parseRule(std::vector<RuleHandleDef> const& handlers, TokenReader& source, OutputParam& output,
+                          TokenList const& key);
+
 private:
     std::vector<RuleHandleDef> qualifiedRules, atRules;
 
-    bool parseRule(TokenReader& source, OutputParam& output, TokenList const& key);
+    void parseRule(TokenReader& source, OutputParam& output, TokenList const& key);
 
 public:
 
