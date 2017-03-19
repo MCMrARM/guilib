@@ -217,7 +217,7 @@ void Parser::parse(Tokenizer& tokenizer) {
     RuleListParser<void*> test;
     DeclarationListParser<void*> test2;
     test.addQualifiedRuleHandler([](ComponentList const&) { return true; }, [&test2](ComponentList const& key, ComponentReader& source, void*& output) {
-        //printf("Parse qualified rule\n");
+        printf("Parse qualified rule\n");
         test2.parse(source, output);
     });
     void* np;

@@ -34,12 +34,13 @@ add_executable(guilib
         include/guilib/element.h include/guilib/container.h include/guilib/window.h include/guilib/ninepatch.h
         include/guilib/button.h include/guilib/text.h include/guilib/color.h include/guilib/style_props_text.h
         include/guilib/style_def.h include/guilib/style_common.h include/guilib/style_props_common.h
-        include/guilib/style_def_callbacks.h include/guilib/display_mode.h include/guilib/style_props_element.h
+        include/guilib/style_def_declarations.h include/guilib/display_mode.h include/guilib/style_props_element.h
         include/guilib/inline_builder.h include/guilib/mesh.h include/guilib/mesh_builder.h include/guilib/font.h
         include/guilib/string_util.h include/guilib/style_props_container.h include/guilib/layout_properties.h
         include/guilib/css_tokenizer.h include/guilib/css_stylesheet.h include/guilib/css_parser.h
+        include/guilib/style_rule.h
         src/color.cpp src/element.cpp src/container.cpp src/text.cpp src/inline_builder.cpp src/font.cpp
-        src/css_tokenizer.cpp src/string_util.cpp src/css_stylesheet.cpp src/css_parser.cpp
+        src/css_tokenizer.cpp src/string_util.cpp src/css_stylesheet.cpp src/css_parser.cpp src/style_rule.cpp
 
         example/src/mesh_impl.h example/src/mesh_builder_impl.h example/src/texture_impl.h example/src/shader.h
         example/src/image.h example/src/ascii_pixel_font.h

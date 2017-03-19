@@ -4,7 +4,7 @@
 
 #define DEF_NAME GuiElement
 #define DEF_LISTH <guilib/style_props_element.h>
-#include <guilib/style_def_callbacks.h>
+#include <guilib/style_def_declarations.h>
 
 using namespace guilib;
 
