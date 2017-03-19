@@ -28,10 +28,11 @@ private:
         void releaseRef();
     };
     Description* description = nullptr;
-    void* data;
+    void* data = nullptr;
 
     void updateDescription(Description* description);
-    void destroyDescription();
+
+    static void destroyData(Description* description, void* data);
 
     static Description* currentDescription;
 
@@ -53,7 +54,7 @@ public:
 
     StyleRule();
 
-    ~StyleRule() { destroyDescription(); }
+    ~StyleRule();
 
     /**
      * This is a internal class used to automagically register style declarations.
@@ -71,9 +72,9 @@ public:
                 new ((T*) ptr)T();
             }, [](void* newPtr, void* oldPtr) {
                 new ((T*) newPtr)T((T&&) (*(T*) oldPtr));
-                delete (T*) oldPtr;
+                ((T*) oldPtr)->~T();
             }, [](void* ptr) {
-                delete (T*) ptr;
+                ((T*) ptr)->~T();
             } });
             desc->totalSize += sizeof(T);
         }

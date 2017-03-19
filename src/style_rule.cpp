@@ -13,24 +13,44 @@ void StyleRule::Description::releaseRef() {
 }
 
 void StyleRule::updateDescription(Description* description) {
-    if (this->description != nullptr)
-        destroyDescription();
+    Description* oldDescription = this->description;
+    void* oldData = this->data;
     this->description = description;
+
     description->acquireRef();
     data = malloc(description->totalSize);
-    for (auto const& ent : description->entries)
-        ent.constructFunc((void*) ((char*) data + ent.offset));
+    for (size_t i = 0; i < description->entries.size(); i++) {
+        auto& ent = description->entries[i];
+        if (i < oldDescription->entries.size())
+            ent.moveFunc((void*) ((char*) data + ent.offset), (void*) ((char*) oldData + ent.offset));
+        else
+            ent.constructFunc((void*) ((char*) data + ent.offset));
+    }
+
+    if (oldData != nullptr)
+        destroyData(oldDescription, oldData);
 }
 
-void StyleRule::destroyDescription() {
+void StyleRule::destroyData(Description* description, void* data) {
     for (auto const& ent : description->entries)
         ent.destructFunc((void*) ((char*) data + ent.offset));
+    free(data);
     description->releaseRef();
-    description = nullptr;
 }
 
 StyleRule::StyleRule() {
-    updateDescription(currentDescription);
+    if (currentDescription->totalSize > 0) {
+        description = currentDescription;
+        description->acquireRef();
+        data = malloc(description->totalSize);
+        for (auto const& ent : description->entries)
+            ent.constructFunc((void*) ((char*) data + ent.offset));
+    }
+}
+
+StyleRule::~StyleRule() {
+    if (data != nullptr)
+        destroyData(description, data);
 }
 
 StyleRule::Description* StyleRule::createNewDescription() {
