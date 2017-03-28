@@ -1,17 +1,19 @@
 #include <map>
 #include <string>
 #include "style_common.h"
+#include "style_rule.h"
 
 namespace guilib {
 
 class DEF_NAME;
 
 #define _STYLE_NAME(A, B) A ## B
-#define STYLE_NAME(X) _MGR_NAME(X, Style)
-#define _MGR_NAME(A, B) A ## B
-#define MGR_NAME(X) _MGR_NAME(X, StyleManager)
+#define STYLE_NAME(X) _STYLE_NAME(X, Style)
+#define MGR_NAME(X) _STYLE_NAME(X, StyleManager)
 
 struct STYLE_NAME(DEF_NAME) {
+
+    static StyleRule::RegistrationHandle<STYLE_NAME(DEF_NAME)> Registration;
 
 #define STYLE_PROP(name, cssname, type, def, cb) GuiStyleProperty<type> name = def;
 #include DEF_LISTH

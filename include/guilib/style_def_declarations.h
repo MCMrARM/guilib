@@ -1,7 +1,10 @@
 #include "style_common.h"
 
-#define _MGR_NAME(A, B) A ## B
-#define MGR_NAME(X) _MGR_NAME(X, StyleManager)
+#define _STYLE_NAME(A, B) A ## B
+#define STYLE_NAME(X) _STYLE_NAME(X, Style)
+#define MGR_NAME(X) _STYLE_NAME(X, StyleManager)
+
+guilib::StyleRule::RegistrationHandle<guilib::STYLE_NAME(DEF_NAME)> guilib::STYLE_NAME(DEF_NAME)::Registration;
 
 void guilib::MGR_NAME(DEF_NAME)::updateState(guilib::GuiStyleState const& newState) {
     guilib::GuiStyleState oldState = state;
