@@ -1,10 +1,15 @@
 #include <guilib/css_parser.h>
 
 #include <guilib/css_tokenizer.h>
+#include <guilib/string_util.h>
 
 using namespace guilib::css;
 
 ComponentValue ComponentValue::INVALID (TokenType::INVALID);
+
+bool ComponentValue::isFunction(std::string const& name) const {
+    return isFunction() && StrUtil::equalsIgnoreCase(asFunction().name, name);
+}
 
 std::string ComponentValue::toString() const {
     if (isFunction()) {
@@ -75,47 +80,18 @@ void ComponentReader::exitBasicBlock() {
     blocksWereProperlyOpened.pop();
 }
 
-template <typename OutputParam>
-void RuleListParser<OutputParam>::clear() {
-    qualifiedRules.clear();
-    atRules.clear();
-}
-
-template <typename OutputParam>
-void RuleListParser<OutputParam>::addQualifiedRuleHandler(RuleCondFunc cond, RuleHandleFunc handle) {
-    qualifiedRules.push_back({cond, handle});
-}
-
-template <typename OutputParam>
-void RuleListParser<OutputParam>::addAtRuleHandler(RuleCondFunc cond, RuleHandleFunc handle) {
-    atRules.push_back({cond, handle});
-}
-
-template <typename OutputParam>
-void RuleListParser<OutputParam>::parseRule(std::vector<RuleHandleDef> const& handlers, ComponentReader& source, OutputParam& output,
-                                            ComponentList const& key) {
+void ParserHelper::parseRule(RuleHandleFunc const& handler, ComponentList const& key, ComponentReader& source) {
     source.enterBasicBlock();
-    for (RuleHandleDef const& def : handlers) {
-        if (def.cond(key)) {
-            def.handle(key, source, output);
-            source.exitBasicBlock();
-            return;
-        }
+    if (handler(key, source)) {
+        source.exitBasicBlock();
+        return;
     }
     while (!source.next().isEOF());
     source.exitBasicBlock();
 }
 
-template <typename OutputParam>
-void RuleListParser<OutputParam>::parseRule(ComponentReader& source, OutputParam& output, ComponentList const& key) {
-    std::vector<RuleHandleDef>* handlers = &qualifiedRules;
-    if (key[0].getType() == TokenType::AT_KEYWORD)
-        handlers = &atRules;
-    parseRule(*handlers, source, output, key);
-}
-
-template <typename OutputParam>
-void RuleListParser<OutputParam>::parse(ComponentReader& source, OutputParam& output, bool topLevel) {
+void ParserHelper::parseRuleList(ComponentReader& source, RuleHandleFunc qualifiedHandler, RuleHandleFunc atHandler,
+                                 bool topLevel) {
     ComponentList keyComponents;
     ComponentValue component (TokenType::INVALID);
     while (!(component = source.next()).isEOF()) {
@@ -126,7 +102,10 @@ void RuleListParser<OutputParam>::parse(ComponentReader& source, OutputParam& ou
                 continue;
         }
         if (component.getType() == TokenType::CURLY_BRACKET_OPEN) {
-            parseRule(source, output, keyComponents);
+            if (keyComponents[0].getType() == TokenType::AT_KEYWORD)
+                parseRule(atHandler, keyComponents, source);
+            else
+                parseRule(qualifiedHandler, keyComponents, source);
             keyComponents.clear();
             continue;
         }
@@ -134,42 +113,19 @@ void RuleListParser<OutputParam>::parse(ComponentReader& source, OutputParam& ou
     }
 }
 
-template <typename OutputParam>
-void DeclarationListParser<OutputParam>::clear() {
-    atRules.clear();
-    declarations.clear();
-}
-
-template <typename OutputParam>
-void DeclarationListParser<OutputParam>::addAtRuleHandler(typename RuleListParser<OutputParam>::RuleCondFunc cond,
-                                                          typename RuleListParser<OutputParam>::RuleHandleFunc handle) {
-    atRules.push_back({cond, handle});
-}
-
-template <typename OutputParam>
-void DeclarationListParser<OutputParam>::addDeclaration(DeclarationCondFunc cond, DeclarationHandleFunc handle) {
-    declarations.push_back({cond, handle});
-}
-
-template <typename OutputParam>
-bool DeclarationListParser<OutputParam>::parseDeclaration(std::string const& key, ComponentList& value, OutputParam& output) {
+void ParserHelper::parseDeclaration(DeclarationHandleFunc const& handler, std::string const& key,
+                                    ComponentList value) {
     bool important = false;
     if (value[-2].isDelim('!') && value[-1].isIdent("important")) {
         value.pop();
         value.pop();
         important = true;
     }
-    for (DeclarationHandleDef& def : declarations) {
-        if (def.cond(key)) {
-            def.handle(key, value, important, output);
-            return true;
-        }
-    }
-    return false;
+    handler(key, value, important);
 }
 
-template <typename OutputParam>
-void DeclarationListParser<OutputParam>::parse(ComponentReader& source, OutputParam& output) {
+void ParserHelper::parseDeclarationList(ComponentReader& source, DeclarationHandleFunc declarationHandler,
+                                        RuleHandleFunc atHandler) {
     ComponentValue component (TokenType::INVALID);
     while (!(component = source.next()).isEOF()) {
         if (component.getType() == TokenType::WHITESPACE || component.getType() == TokenType::SEMICOLON)
@@ -179,7 +135,7 @@ void DeclarationListParser<OutputParam>::parse(ComponentReader& source, OutputPa
             keyComponents.append(std::move(component));
             while (!(component = source.next()).isEOF()) {
                 if (component.getType() == TokenType::CURLY_BRACKET_OPEN) {
-                    RuleListParser<OutputParam>::parseRule(atRules, source, output, keyComponents);
+                    parseRule(atHandler, keyComponents, source);
                     break;
                 }
                 keyComponents.append(std::move(component));
@@ -201,7 +157,8 @@ void DeclarationListParser<OutputParam>::parse(ComponentReader& source, OutputPa
                 components.append(std::move(component));
             if (components.size() > 0 && component.getType() == TokenType::WHITESPACE)
                 components.pop(); // trim last token
-            parseDeclaration(key, components, output);
+
+            parseDeclaration(declarationHandler, key, std::move(components));
             continue;
         }
         // parse error
@@ -217,7 +174,7 @@ void Parser::parse(Tokenizer& tokenizer) {
     RuleListParser<void*> test;
     DeclarationListParser<void*> test2;
     test.addQualifiedRuleHandler([](ComponentList const&) { return true; }, [&test2](ComponentList const& key, ComponentReader& source, void*& output) {
-        //printf("Parse qualified rule\n");
+        printf("Parse qualified rule\n");
         test2.parse(source, output);
     });
     void* np;
